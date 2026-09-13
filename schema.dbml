@@ -25,7 +25,7 @@ Table Grab [headercolor: #63ff63] {
 Table Rider [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
-	id_card_number varchar2(20)
+	id_card_number varchar(20)
 	status varchar(20)
 	total_rides int
 	created_at timestamptz
@@ -64,7 +64,7 @@ Table Review [headercolor: #07b5fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_history_id uuid [ unique ]
 	rating int
-	comment text(65535)
+	comment text
 	created_at timestamptz
 }
 
@@ -155,8 +155,8 @@ Table "Audit Log" [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	table_name varchar(50)
 	record_id uuid
-	old_value text(65535)
-	new_value text(65535)
+	old_value text
+	new_value text
 	created_at datetime
 }
 

@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:12:18.944Z
+-- Generated at: 2026-09-13T07:14:32.767Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -29,7 +29,7 @@ CREATE TABLE "Grab" (
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "id_card_number" varchar2(20),
+  "id_card_number" varchar(20),
   "status" varchar(20),
   "total_rides" int,
   "created_at" timestamptz
@@ -68,7 +68,7 @@ CREATE TABLE "Review" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_history_id" uuid UNIQUE,
   "rating" int,
-  "comment" text(65535),
+  "comment" text,
   "created_at" timestamptz
 );
 
@@ -159,8 +159,8 @@ CREATE TABLE "Audit Log" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "table_name" varchar(50),
   "record_id" uuid,
-  "old_value" text(65535),
-  "new_value" text(65535),
+  "old_value" text,
+  "new_value" text,
   "created_at" datetime
 );
 
