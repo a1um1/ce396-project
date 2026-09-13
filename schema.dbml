@@ -157,7 +157,7 @@ Table "Audit Log" [headercolor: #175e7a] {
 	record_id uuid
 	old_value text
 	new_value text
-	created_at datetime
+	created_at timestamptz
 }
 
 Ref "fk_Rider_user_id _users" {

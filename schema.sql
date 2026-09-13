@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:14:32.767Z
+-- Generated at: 2026-09-13T07:15:02.240Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -161,7 +161,7 @@ CREATE TABLE "Audit Log" (
   "record_id" uuid,
   "old_value" text,
   "new_value" text,
-  "created_at" datetime
+  "created_at" timestamptz
 );
 
 ALTER TABLE "Rider"
