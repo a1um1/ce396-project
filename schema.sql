@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T05:11:46.956Z
+-- Generated at: 2026-09-13T07:12:18.944Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -23,7 +23,7 @@ CREATE TABLE "Grab" (
   "company_name" varchar(150),
   "registration_number" varchar(30),
   "adress" varchar(255),
-  "commission_rate" numeric DEFAULT ((5,2))
+  "commission_rate" numeric(5,2)
 );
 
 CREATE TABLE "Rider" (
@@ -39,11 +39,11 @@ CREATE TABLE "RideRequest" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "vehicle_type_id" uuid,
-  "pickup_lat" numeric DEFAULT ((9,6)),
-  "pickup_lng" numeric DEFAULT ((9,6)),
+  "pickup_lat" numeric(9,6),
+  "pickup_lng" numeric(9,6),
   "pickup_address" varchar(255),
-  "dropoff_lat" numeric DEFAULT ((9,6)),
-  "dropoff_lng" numeric DEFAULT ((9,6)),
+  "dropoff_lat" numeric(9,6),
+  "dropoff_lng" numeric(9,6),
   "dropoff_address" varchar(255),
   "status" varchar(20),
   "requested_at" timestamptz
@@ -55,10 +55,10 @@ CREATE TABLE "RideHistory" (
   "user_id" uuid,
   "rider_id" uuid,
   "vehicle_id" uuid,
-  "distance_km" numeric DEFAULT ((6,2)),
+  "distance_km" numeric(6,2),
   "duration_min" int,
-  "base_price" numeric DEFAULT ((10,2)),
-  "final_price" numeric DEFAULT ((10,2)),
+  "base_price" numeric(10,2),
+  "final_price" numeric(10,2),
   "start_time" timestamptz,
   "end_time" timestamptz,
   "status" varchar(20)
@@ -76,7 +76,7 @@ CREATE TABLE "Payment History" (
   "id" uuid PRIMARY KEY NOT NULL,
   "ride_history_id" uuid,
   "payment_method_id" uuid,
-  "amount" numeric DEFAULT ((10,2)),
+  "amount" numeric(10,2),
   "status" varchar(20),
   "paid_at" timestamptz
 );
@@ -94,7 +94,7 @@ CREATE TABLE "Discount History" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "payment_history_id" uuid,
   "discount_id" uuid,
-  "discount_amount" numeric DEFAULT ((10,2)),
+  "discount_amount" numeric(10,2),
   "applied_at" timestamptz
 );
 
@@ -103,7 +103,7 @@ CREATE TABLE "Discount" (
   "code" varchar(30) UNIQUE,
   "description" varchar(255),
   "discount_type" varchar(10),
-  "value" numeric DEFAULT ((10,2)),
+  "value" numeric(10,2),
   "valid_from" timestamptz,
   "valid_to" timestamptz
 );
@@ -135,16 +135,16 @@ CREATE TABLE "VechiclesTypes" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "name" varchar(50),
   "description" varchar(255),
-  "base_fare" numeric DEFAULT ((10,2)),
-  "price_per_km" numeric DEFAULT ((10,2)),
+  "base_fare" numeric(10,2),
+  "price_per_km" numeric(10,2),
   "capacity" int
 );
 
 CREATE TABLE "DistanceToPrice" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "min_distance_km" numeric DEFAULT ((6,2)),
-  "max_distance_km" numeric DEFAULT ((6,2)),
-  "price_per_km" numeric DEFAULT ((10,2))
+  "min_distance_km" numeric(6,2),
+  "max_distance_km" numeric(6,2),
+  "price_per_km" numeric(10,2)
 );
 
 CREATE TABLE "TimePriceMultiplier" (
@@ -152,7 +152,7 @@ CREATE TABLE "TimePriceMultiplier" (
   "name" varchar(50),
   "start_time" time,
   "end_time" time,
-  "multiplier" numeric DEFAULT ((4,2))
+  "multiplier" numeric(4,2)
 );
 
 CREATE TABLE "Audit Log" (
