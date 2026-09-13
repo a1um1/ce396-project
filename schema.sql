@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:30:14.680Z
+-- Generated at: 2026-09-13T07:35:36.884Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -241,9 +241,9 @@ ALTER TABLE "Payment History"
 	ON UPDATE NO ACTION;
 
 ALTER TABLE "Review"
-	ADD CONSTRAINT "fk_Review_ride_history_id_Payment History"
+	ADD CONSTRAINT "fk_Review_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
-	REFERENCES "Payment History" ("id")
+	REFERENCES "RideHistory" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 

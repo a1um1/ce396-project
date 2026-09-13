@@ -200,8 +200,8 @@ Ref "fk_Payment History_payment_method_id_Payment Methods" {
 	"Payment History".payment_method_id > "Payment Methods".id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Review_ride_history_id_Payment History" {
-	Review.ride_history_id > "Payment History".id [ delete: no action, update: no action ]
+Ref "fk_Review_ride_history_id_RideHistory" {
+	Review.ride_history_id > RideHistory.id [ delete: no action, update: no action ]
 }
 
 Ref "fk_Discount History_payment_history_id_Payment History" {
