@@ -1,0 +1,225 @@
+Table users [headercolor: #6360f7] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	name varchar(100)
+	email varchar(150) [ unique ]
+	password_hash varchar(255)
+	profile_image varchar(255)
+	created_at timestamptz
+	update_at timestamptz
+}
+
+Table Phon_user [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	user_id uuid
+	phone_number varchar(20) [ unique ]
+}
+
+Table Grab [headercolor: #63ff63] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	company_name varchar(150)
+	registration_number varchar(30)
+	adress varchar(255)
+	commission_rate numeric(5,2)
+}
+
+Table Rider [headercolor: #36e094] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	user_id uuid
+	id_card_number varchar2(20)
+	status varchar(20)
+	total_rides int
+	created_at timestamptz
+}
+
+Table RideRequest [headercolor: #42c96d] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	user_id uuid
+	vehicle_type_id uuid
+	pickup_lat numeric(9,6)
+	pickup_lng numeric(9,6)
+	pickup_address varchar(255)
+	dropoff_lat numeric(9,6)
+	dropoff_lng numeric(9,6)
+	dropoff_address varchar(255)
+	status varchar(20)
+	requested_at timestamptz
+}
+
+Table RideHistory [headercolor: #0b8c52] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	ride_request_id uuid
+	user_id uuid
+	rider_id uuid
+	vehicle_id uuid
+	distance_km numeric(6,2)
+	duration_min int
+	base_price numeric(10,2)
+	final_price numeric(10,2)
+	start_time timestamptz
+	end_time timestamptz
+	status varchar(20)
+}
+
+Table Review [headercolor: #07b5fa] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	ride_history_id uuid [ unique ]
+	rating int
+	comment text(65535)
+	created_at timestamptz
+}
+
+Table "Payment History" [headercolor: #d60d0d] {
+	id uuid [ pk, not null ]
+	ride_history_id uuid
+	payment_method_id uuid
+	amount numeric(10,2)
+	status varchar(20)
+	paid_at timestamptz
+}
+
+Table "Payment Methods" [headercolor: #ff0a5c] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	user_id uuid
+	type varchar(20)
+	provider varchar(50)
+	account_nimber varchar(30)
+	is_default boolean
+}
+
+Table "Discount History" [headercolor: #cf11fa] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	payment_history_id uuid
+	discount_id uuid
+	discount_amount numeric(10,2)
+	applied_at timestamptz
+}
+
+Table Discount [headercolor: #ee81fc] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	code varchar(30) [ unique ]
+	description varchar(255)
+	discount_type varchar(10)
+	value numeric(10,2)
+	valid_from timestamptz
+	valid_to timestamptz
+}
+
+Table Vehicles [headercolor: #fce028] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	rider_id uuid
+	vehicle_type_id uuid
+	license_plate varchar(15) [ unique ]
+	brand varchar(50)
+	model varchar(50)
+	color varchar(30)
+	year int
+	status varchar(20)
+}
+
+Table GovermentDocuments [headercolor: #ff6e3d] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	rider_id uuid
+	document_type varchar(3)
+	document_number varchar(30)
+	file_url varchar(255)
+	verification_status varchar(20)
+	verified_at timestamptz
+	expiry_date date
+}
+
+Table VechiclesTypes [headercolor: #d6c315] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	name varchar(50)
+	description varchar(255)
+	base_fare numeric(10,2)
+	price_per_km numeric(10,2)
+	capacity int
+}
+
+Table DistanceToPrice [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	min_distance_km numeric(6,2)
+	max_distance_km numeric(6,2)
+	price_per_km numeric(10,2)
+}
+
+Table TimePriceMultiplier [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	name varchar(50)
+	start_time time
+	end_time time
+	multiplier numeric(4,2)
+}
+
+Table "Audit Log" [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `UUIDV7()` ]
+	table_name varchar(50)
+	record_id uuid
+	old_value text(65535)
+	new_value text(65535)
+	created_at datetime
+}
+
+Ref "fk_Rider_user_id _users" {
+	Rider.user_id > users.id [ delete: no action, update: no action ]
+}
+
+Ref fk_GovermentDocuments_rider_id_Rider {
+	GovermentDocuments.rider_id > Rider.id [ delete: no action, update: no action ]
+}
+
+Ref fk_Vehicles_rider_id_Rider {
+	Vehicles.rider_id > Rider.id [ delete: no action, update: no action ]
+}
+
+Ref fk_Vehicles_vehicle_type_id_VechiclesTypes {
+	Vehicles.vehicle_type_id > VechiclesTypes.id [ delete: no action, update: no action ]
+}
+
+Ref "fk_RideRequest_user_id _users" {
+	RideRequest.user_id > users.id [ delete: no action, update: no action ]
+}
+
+Ref fk_RideHistory_ride_request_id_RideRequest {
+	RideHistory.ride_request_id > RideRequest.id [ delete: no action, update: no action ]
+}
+
+Ref fk_RideHistory_user_id_users {
+	RideHistory.user_id > users.id [ delete: no action, update: no action ]
+}
+
+Ref fk_RideHistory_rider_id_Rider {
+	RideHistory.rider_id > Rider.id [ delete: no action, update: no action ]
+}
+
+Ref fk_RideHistory_vehicle_id_Vehicles {
+	RideHistory.vehicle_id > Vehicles.id [ delete: no action, update: no action ]
+}
+
+Ref "fk_users_id_Payment Methods" {
+	users.id < "Payment Methods".user_id [ delete: no action, update: no action ]
+}
+
+Ref "fk_Payment History_ride_history_id_RideHistory" {
+	"Payment History".ride_history_id > RideHistory.id [ delete: no action, update: no action ]
+}
+
+Ref "fk_Payment History_payment_method_id_Payment Methods" {
+	"Payment History".payment_method_id > "Payment Methods".id [ delete: no action, update: no action ]
+}
+
+Ref "fk_Review_ride_history_id_Payment History" {
+	Review.ride_history_id > "Payment History".id [ delete: no action, update: no action ]
+}
+
+Ref "fk_Discount History_payment_history_id_Payment History" {
+	"Discount History".payment_history_id > "Payment History".id [ delete: no action, update: no action ]
+}
+
+Ref "fk_Discount History_discount_id_Discount" {
+	"Discount History".discount_id > Discount.id [ delete: no action, update: no action ]
+}
+
+Ref fk_Phon_user_user_id_users {
+	Phon_user.user_id > users.id [ delete: no action, update: no action ]
+}
