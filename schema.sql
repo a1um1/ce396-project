@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:35:36.884Z
+-- Generated at: 2026-09-13T07:54:10.191Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -21,7 +21,6 @@ CREATE TABLE "Phone_user" (
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "id_card_number" varchar(20),
   "status" varchar(20),
   "total_rides" int,
   "created_at" timestamptz
@@ -155,6 +154,8 @@ CREATE TABLE "Audit Log" (
   "new_value" text,
   "created_at" timestamptz
 );
+
+CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("document_type", "document_number");
 
 ALTER TABLE "Rider"
 	ADD CONSTRAINT "fk_Rider_user_id _users"

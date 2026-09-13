@@ -17,7 +17,6 @@ Table Phone_user [headercolor: #175e7a] {
 Table Rider [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
-	id_card_number varchar(20)
 	status varchar(20)
 	total_rides int
 	created_at timestamptz
@@ -117,6 +116,10 @@ Table GovermentDocuments [headercolor: #ff6e3d] {
 	verification_status varchar(20)
 	verified_at timestamptz
 	expiry_date date
+
+	indexes {
+		(document_type, document_number) [ name: 'GovermentDocuments_unique_0', unique ]
+	}
 }
 
 Table VehiclesTypes [headercolor: #d6c315] {
@@ -200,7 +203,7 @@ Ref "fk_Payment History_payment_method_id_Payment Methods" {
 	"Payment History".payment_method_id > "Payment Methods".id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Review_ride_history_id_RideHistory" {
+Ref fk_Review_ride_history_id_RideHistory {
 	Review.ride_history_id > RideHistory.id [ delete: no action, update: no action ]
 }
 
