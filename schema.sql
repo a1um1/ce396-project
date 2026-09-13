@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:21:30.417Z
+-- Generated at: 2026-09-13T07:30:14.680Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -78,7 +78,7 @@ CREATE TABLE "Payment Methods" (
   "user_id" uuid,
   "type" varchar(20),
   "provider" varchar(50),
-  "account_nimber" varchar(30),
+  "account_number" varchar(30),
   "is_default" boolean
 );
 
@@ -123,7 +123,7 @@ CREATE TABLE "GovermentDocuments" (
   "expiry_date" date
 );
 
-CREATE TABLE "VechiclesTypes" (
+CREATE TABLE "VehiclesTypes" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "name" varchar(50),
   "description" varchar(255),
@@ -178,9 +178,9 @@ ALTER TABLE "Vehicles"
 	ON UPDATE NO ACTION;
 
 ALTER TABLE "Vehicles"
-	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VechiclesTypes"
+	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VehiclesTypes"
 	FOREIGN KEY ("vehicle_type_id")
-	REFERENCES "VechiclesTypes" ("id")
+	REFERENCES "VehiclesTypes" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
