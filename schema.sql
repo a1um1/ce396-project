@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:15:02.240Z
+-- Generated at: 2026-09-13T07:20:16.390Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -16,14 +16,6 @@ CREATE TABLE "Phon_user" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "phone_number" varchar(20) UNIQUE
-);
-
-CREATE TABLE "Grab" (
-  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "company_name" varchar(150),
-  "registration_number" varchar(30),
-  "adress" varchar(255),
-  "commission_rate" numeric(5,2)
 );
 
 CREATE TABLE "Rider" (

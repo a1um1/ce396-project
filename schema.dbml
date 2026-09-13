@@ -14,14 +14,6 @@ Table Phon_user [headercolor: #175e7a] {
 	phone_number varchar(20) [ unique ]
 }
 
-Table Grab [headercolor: #63ff63] {
-	id uuid [ pk, not null, default: `UUIDV7()` ]
-	company_name varchar(150)
-	registration_number varchar(30)
-	adress varchar(255)
-	commission_rate numeric(5,2)
-}
-
 Table Rider [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
