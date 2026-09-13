@@ -146,21 +146,19 @@ Table DistanceToPrice [headercolor: #175e7a] {
 Table TimePriceMultiplier [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	name varchar(50)
-	"start_time " time
-	"end_time   " time
-	"multiplier " decimal [ default: `(4,2)` ]
+	start_time time
+	end_time time
+	multiplier decimal [ default: `(4,2)` ]
 }
 
 Table "Audit Log" [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
-	"table_name " varchar(50)
-	"record_id  " uuid
+	table_name varchar(50)
+	record_id uuid
 	old_value text(65535)
-	"new_value  " text(65535)
-	"created_at " datetime
+	new_value text(65535)
+	created_at datetime
 }
-
-
 
 Ref "fk_Rider_user_id _users" {
 	Rider.user_id > users.id [ delete: no action, update: no action ]
