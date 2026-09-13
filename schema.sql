@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:20:16.390Z
+-- Generated at: 2026-09-13T07:21:30.417Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -12,7 +12,7 @@ CREATE TABLE "users" (
   "update_at" timestamptz
 );
 
-CREATE TABLE "Phon_user" (
+CREATE TABLE "Phone_user" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "phone_number" varchar(20) UNIQUE
@@ -261,8 +261,8 @@ ALTER TABLE "Discount History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Phon_user"
-	ADD CONSTRAINT "fk_Phon_user_user_id_users"
+ALTER TABLE "Phone_user"
+	ADD CONSTRAINT "fk_Phone_user_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION

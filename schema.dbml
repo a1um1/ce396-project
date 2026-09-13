@@ -8,7 +8,7 @@ Table users [headercolor: #6360f7] {
 	update_at timestamptz
 }
 
-Table Phon_user [headercolor: #175e7a] {
+Table Phone_user [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
 	phone_number varchar(20) [ unique ]
@@ -212,6 +212,6 @@ Ref "fk_Discount History_discount_id_Discount" {
 	"Discount History".discount_id > Discount.id [ delete: no action, update: no action ]
 }
 
-Ref fk_Phon_user_user_id_users {
-	Phon_user.user_id > users.id [ delete: no action, update: no action ]
+Ref fk_Phone_user_user_id_users {
+	Phone_user.user_id > users.id [ delete: no action, update: no action ]
 }
