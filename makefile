@@ -2,7 +2,7 @@ all: check generate-sql format
 
 check:
 	@echo "> Checking for require dependencies..."
-	@which dbml2sql > /dev/null 2>&1 || (echo "Required dependency 'dbml2sql' is not installed." && exit 1)
+	@which dbml2sql > /dev/null 2>&1 || (echo "Required dependency 'dbml2sql' is not installed.\nnpm install -g dbml2sql" && exit 1)
 
 generate-sql:
 	@echo "> Generating SQL files..."
