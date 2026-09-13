@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:15:02.240Z
+-- Generated at: 2026-09-13T07:54:10.191Z
 
 -- เก็บข้อมูลพื้นฐานของผู้ใช้งานทุกคนในระบบ (ทั้ง user และ rider)
 CREATE TABLE "users" (
@@ -9,32 +9,21 @@ CREATE TABLE "users" (
   "email" varchar(150) UNIQUE, -- อีเมลห้ามล็อกอินซ้ำ
   "password_hash" varchar(255), -- การเก็บค่า hash ของรหัสผ่าน
   "profile_image" varchar(255), -- link รูปโปรไฟล์
-  "created_at" timestamptz, 
+  "created_at" timestamptz,
   "update_at" timestamptz
 );
 
 -- ตารางเก็บเบอร์โทร User แยกออกมาเพื่อรองรับได้หลายเบอร์
-CREATE TABLE "Phon_user" (
+CREATE TABLE "Phone_user" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "phone_number" varchar(20) UNIQUE -- เบอร์ห้ามซ้ำกัน
-);
-
---ตารางเก็บข้อมูลแพลตฟอร์ม
---ค่าคอมมิชชั่นที่หักจากคนขับ
-CREATE TABLE "Grab" (
-  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "company_name" varchar(150),
-  "registration_number" varchar(30), -- เลขทะเบียนนิติบุคคล
-  "adress" varchar(255),
-  "commission_rate" numeric(5,2) -- อัตราหักเปอร์เซ็น
 );
 
 -- เก็บข้อมูลเฉพาะ Rider
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "id_card_number" varchar(20), --เลขประจำตัวประชาชน
   "status" varchar(20), -- สถานะการทำงาน
   "total_rides" int, -- สถิติจำนวนรอบที่ให้บริการสำเร็จ
   "created_at" timestamptz -- วันที่สมัครเป็นคนขับ
@@ -96,7 +85,7 @@ CREATE TABLE "Payment Methods" (
   "user_id" uuid,
   "type" varchar(20), -- ประเภท: 'CREDIT_CARD', 'CASH'
   "provider" varchar(50), -- ผู้ให้บริการ: 'VISA', 'MasterCard',
-  "account_nimber" varchar(30), -- เลขที่บัญชี/บัตร
+  "account_number" varchar(30), -- เลขที่บัญชี/บัตร
   "is_default" boolean -- ตั้งเป็นช่องทางชำระเงินเริ่มต้นหรือไม่ (True/False)
 );
 
@@ -138,7 +127,7 @@ CREATE TABLE "GovermentDocuments" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "rider_id" uuid, -- ชี้ว่าเอกสารนี้เป็นของคนขับคนไหน
   "document_type" varchar(3), -- รหัสประเภทเอกสาร เช่น 'IDC' (บัตรปชช)
-  "document_number" varchar(30), 
+  "document_number" varchar(30),
   "file_url" varchar(255),
   "verification_status" varchar(20), -- สถานะการตรวจสอบโดย Admin: 'PENDING', 'APPROVED', 'REJECTED'
   "verified_at" timestamptz, -- วันเวลาที่ Admin อนุมัติ
@@ -146,7 +135,7 @@ CREATE TABLE "GovermentDocuments" (
 );
 
 -- ตารางเก็บข้อมูลประเภทของยานพาหนะที่ระบบรองรับใช้สำหรับการแบ่งเกรดรถ
-CREATE TABLE "VechiclesTypes" (
+CREATE TABLE "VehiclesTypes" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "name" varchar(50), -- ชื่อประเภท เช่น 'Economy Car', 'Premium SUV', 'Motorcycle'
   "description" varchar(255), -- คำอธิบายให้ผู้โดยสารเห็น
@@ -184,6 +173,8 @@ CREATE TABLE "Audit Log" (
   "created_at" timestamptz -- เวลาที่มีการแก้ไข
 );
 
+CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("document_type", "document_number");
+
 -- ตาราง rider เชื่อมกับตาราง users
 -- FK: "user_id" (ในตาราง Rider) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to 1 (ผู้ใช้งาน 1 คน เป็นคนขับได้ 1 บัญชี)
@@ -214,13 +205,13 @@ ALTER TABLE "Vehicles"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
--- ตาราง Vehicles เชื่อมกับตาราง VechiclesTypes
--- FK: "vehicle_type_id" (ในตาราง Vehicles ) อ้างอิงไปยัง PK: "id" (ในตาราง VechiclesTypes)
+-- ตาราง Vehicles เชื่อมกับตาราง VehiclesTypes
+-- FK: "vehicle_type_id" (ในตาราง Vehicles ) อ้างอิงไปยัง PK: "id" (ในตาราง VehiclesTypes)
 -- Relationship: 1 to many (ประเภทรถ 1 ประเภท มีรถอยู่ในหมวดหมู่นี้ได้หลายคัน)
 ALTER TABLE "Vehicles"
-	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VechiclesTypes"
-	FOREIGN KEY ("vehicle_type_id") 
-	REFERENCES "VechiclesTypes" ("id")
+	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VehiclesTypes"
+	FOREIGN KEY ("vehicle_type_id")
+	REFERENCES "VehiclesTypes" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
@@ -305,13 +296,13 @@ ALTER TABLE "Payment History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
--- ตาราง Review เชื่อมกับตาราง Payment History
--- FK: "ride_history_id" (ในตาราง Review) อ้างอิงไปยัง PK: "id" (ในตาราง Payment History)
+-- ตาราง Review เชื่อมกับตาราง Ride History
+-- FK: "ride_history_id" (ในตาราง Review) อ้างอิงไปยัง PK: "id" (ในตาราง Ride History)
 -- Relationship: 1 to 1 (การชำระเงิน 1 รายการ มีรีวิวได้ 1 ครั้ง)
 ALTER TABLE "Review"
-	ADD CONSTRAINT "fk_Review_ride_history_id_Payment History"
+	ADD CONSTRAINT "fk_Review_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
-	REFERENCES "Payment History" ("id")
+	REFERENCES "RideHistory" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
@@ -335,11 +326,11 @@ ALTER TABLE "Discount History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
--- ตาราง Phon_user เชื่อมกับตาราง users
--- FK: "user_id" (ในตาราง Phon_user) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- ตาราง Phone_user เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง Phone_user) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to many (ผู้ใช้งาน 1 คน ลงทะเบียนเบอร์โทรศัพท์ได้หลายเบอร์)
-ALTER TABLE "Phon_user"
-	ADD CONSTRAINT "fk_Phon_user_user_id_users"
+ALTER TABLE "Phone_user"
+	ADD CONSTRAINT "fk_Phone_user_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
