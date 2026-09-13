@@ -19,7 +19,7 @@ Table Grab [headercolor: #63ff63] {
 	company_name varchar(150)
 	registration_number varchar(30)
 	adress varchar(255)
-	commission_rate decimal [ default: `(5,2)` ]
+	commission_rate numeric [ default: `(5,2)` ]
 }
 
 Table Rider [headercolor: #36e094] {
@@ -35,11 +35,11 @@ Table RideRequest [headercolor: #42c96d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
 	vehicle_type_id uuid
-	pickup_lat decimal [ default: `(9,6)` ]
-	pickup_lng decimal [ default: `(9,6)` ]
+	pickup_lat numeric [ default: `(9,6)` ]
+	pickup_lng numeric [ default: `(9,6)` ]
 	pickup_address varchar(255)
-	dropoff_lat decimal [ default: `(9,6)` ]
-	dropoff_lng decimal [ default: `(9,6)` ]
+	dropoff_lat numeric [ default: `(9,6)` ]
+	dropoff_lng numeric [ default: `(9,6)` ]
 	dropoff_address varchar(255)
 	status varchar(20)
 	requested_at timestamptz
@@ -51,10 +51,10 @@ Table RideHistory [headercolor: #0b8c52] {
 	user_id uuid
 	rider_id uuid
 	vehicle_id uuid
-	distance_km decimal [ default: `(6,2)` ]
+	distance_km numeric [ default: `(6,2)` ]
 	duration_min int
-	base_price decimal [ default: `(10,2)`]
-	final_price decimal [ default: `(10,2)` ]
+	base_price numeric [ default: `(10,2)`]
+	final_price numeric [ default: `(10,2)` ]
 	start_time timestamptz
 	end_time timestamptz
 	status varchar(20)
@@ -72,7 +72,7 @@ Table "Payment History" [headercolor: #d60d0d] {
 	id uuid [ pk, not null ]
 	ride_history_id uuid
 	payment_method_id uuid
-	amount decimal [ default: `(10,2)` ]
+	amount numeric [ default: `(10,2)` ]
 	status varchar(20)
 	paid_at timestamptz
 }
@@ -90,7 +90,7 @@ Table "Discount History" [headercolor: #cf11fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	payment_history_id uuid
 	discount_id uuid
-	discount_amount decimal [ default: `(10,2)` ]
+	discount_amount numeric [ default: `(10,2)` ]
 	applied_at timestamptz
 }
 
@@ -99,7 +99,7 @@ Table Discount [headercolor: #ee81fc] {
 	code varchar(30) [ unique ]
 	description varchar(255)
 	discount_type varchar(10)
-	value decimal [ default: `(10,2)` ]
+	value numeric [ default: `(10,2)` ]
 	valid_from timestamptz
 	valid_to timestamptz
 }
@@ -131,16 +131,16 @@ Table VechiclesTypes [headercolor: #d6c315] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	name varchar(50)
 	description varchar(255)
-	base_fare decimal [ default: `(10,2)` ]
-	price_per_km decimal [ default: `(10,2)` ]
+	base_fare numeric [ default: `(10,2)` ]
+	price_per_km numeric [ default: `(10,2)` ]
 	capacity int
 }
 
 Table DistanceToPrice [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
-	min_distance_km decimal [ default: `(6,2)` ]
-	max_distance_km decimal [ default: `(6,2)` ]
-	price_per_km decimal [ default: `(10,2)` ]
+	min_distance_km numeric [ default: `(6,2)` ]
+	max_distance_km numeric [ default: `(6,2)` ]
+	price_per_km numeric [ default: `(10,2)` ]
 }
 
 Table TimePriceMultiplier [headercolor: #175e7a] {
@@ -148,7 +148,7 @@ Table TimePriceMultiplier [headercolor: #175e7a] {
 	name varchar(50)
 	start_time time
 	end_time time
-	multiplier decimal [ default: `(4,2)` ]
+	multiplier numeric [ default: `(4,2)` ]
 }
 
 Table "Audit Log" [headercolor: #175e7a] {
