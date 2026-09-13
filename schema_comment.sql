@@ -2,53 +2,60 @@
 -- Database: PostgreSQL
 -- Generated at: 2026-09-13T07:15:02.240Z
 
+-- เก็บข้อมูลพื้นฐานของผู้ใช้งานทุกคนในระบบ (ทั้ง user และ rider )
 CREATE TABLE "users" (
-  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "name" varchar(100),
-  "email" varchar(150) UNIQUE,
-  "password_hash" varchar(255),
-  "profile_image" varchar(255),
-  "created_at" timestamptz,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()), --ใช้UUIDv7 เพื่อเลี่ยง ID ชนกัน
+  "name" varchar(100), -- ชื่อ-นามสกุล
+  "email" varchar(150) UNIQUE, -- อีเมลห้ามล็อกอินซ้ำ
+  "password_hash" varchar(255), -- การเก็บค่า hash ของรหัสผ่าน
+  "profile_image" varchar(255), -- link รูปโปรไฟล์
+  "created_at" timestamptz, 
   "update_at" timestamptz
 );
 
+-- ตารางเก็บเบอร์โทรUser แยกออกมาเพื่อรองรับได้หลายเบอร์
 CREATE TABLE "Phon_user" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "phone_number" varchar(20) UNIQUE
+  "phone_number" varchar(20) UNIQUE -- เบอร์ห้ามซ้ำกัน
 );
 
+--ตารางเก็บข้อมูลแพลตฟอร์ม
+--ค่าคอมมิชชั่นที่หักจากคนขับ
 CREATE TABLE "Grab" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "company_name" varchar(150),
-  "registration_number" varchar(30),
+  "registration_number" varchar(30), -- เลขทะเบียนนิติบุคคล
   "adress" varchar(255),
-  "commission_rate" numeric(5,2)
+  "commission_rate" numeric(5,2) -- อัตราหักเปอร์เซ็น
 );
 
+-- เก็บข้อมูลเฉพาะ Rider
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "id_card_number" varchar(20),
-  "status" varchar(20),
-  "total_rides" int,
-  "created_at" timestamptz
+  "id_card_number" varchar(20), --เลขประจำตัวประชาชน
+  "status" varchar(20), -- สถานะการทำงาน
+  "total_rides" int, -- สถิติจำนวนรอบที่ให้บริการสำเร็จ
+  "created_at" timestamptz -- วันที่สมัครเป็นคนขับ
 );
 
+-- ตารางคำขอเรียกรถ (สร้างเมื่อผู้ใช้กดค้นหาคนขับ)
 CREATE TABLE "RideRequest" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "user_id" uuid,
-  "vehicle_type_id" uuid,
-  "pickup_lat" numeric(9,6),
+  "user_id" uuid, -- userเรียก
+  "vehicle_type_id" uuid, -- ประเภทรถที่ต้องการ
+  "pickup_lat" numeric(9,6), -- พิกัดรับ
   "pickup_lng" numeric(9,6),
   "pickup_address" varchar(255),
-  "dropoff_lat" numeric(9,6),
+  "dropoff_lat" numeric(9,6), -- พิกัดส่ง
   "dropoff_lng" numeric(9,6),
   "dropoff_address" varchar(255),
-  "status" varchar(20),
+  "status" varchar(20), -- สถานะ (Searching , Accepted, Cancelled)
   "requested_at" timestamptz
 );
 
+-- ตารางประวัติการเดินทาง (เมื่อคนขับรับงานแล้ว)
 CREATE TABLE "RideHistory" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_request_id" uuid,
@@ -57,113 +64,129 @@ CREATE TABLE "RideHistory" (
   "vehicle_id" uuid,
   "distance_km" numeric(6,2),
   "duration_min" int,
-  "base_price" numeric(10,2),
-  "final_price" numeric(10,2),
+  "base_price" numeric(10,2), -- ราคาก่อนหักส่วนลด
+  "final_price" numeric(10,2), -- ราคาที่ต้องจ่ายจริง
   "start_time" timestamptz,
   "end_time" timestamptz,
-  "status" varchar(20)
+  "status" varchar(20) -- Completed, Cancelled
 );
 
+-- ตารางรีวิวและให้คะแนนหลังจบการเดินทาง
 CREATE TABLE "Review" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_history_id" uuid UNIQUE,
-  "rating" int,
+  "rating" int, -- คะแนน (1-5)
   "comment" text,
   "created_at" timestamptz
 );
 
+-- ตารางประวัติการชำระเงินของการเดินทางแต่ละรอบ
 CREATE TABLE "Payment History" (
   "id" uuid PRIMARY KEY NOT NULL,
   "ride_history_id" uuid,
-  "payment_method_id" uuid,
+  "payment_method_id" uuid, -- จ่ายด้วยช่องทางไหน
   "amount" numeric(10,2),
-  "status" varchar(20),
+  "status" varchar(20),-- สถานะการตัดเงิน: 'SUCCESS', 'FAILED', 'REFUNDED'
   "paid_at" timestamptz
 );
 
+-- ตารางช่องทางการชำระเงินของผู้ใช้ (บัตรเครดิต, ธนาคาร)
 CREATE TABLE "Payment Methods" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
-  "type" varchar(20),
-  "provider" varchar(50),
-  "account_nimber" varchar(30),
-  "is_default" boolean
+  "type" varchar(20), -- ประเภท: 'CREDIT_CARD', 'CASH'
+  "provider" varchar(50), -- ผู้ให้บริการ: 'VISA', 'MasterCard',
+  "account_nimber" varchar(30), -- เลขที่บัญชี/บัตร
+  "is_default" boolean -- ตั้งเป็นช่องทางชำระเงินเริ่มต้นหรือไม่ (True/False)
 );
 
+-- ตารางบันทึกประวัติการใช้งานโค้ดส่วนลด
 CREATE TABLE "Discount History" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "payment_history_id" uuid,
-  "discount_id" uuid,
-  "discount_amount" numeric(10,2),
-  "applied_at" timestamptz
+  "payment_history_id" uuid, -- ลดในการจ่ายเงินบิลไหน
+  "discount_id" uuid, -- ใช้โค้ดส่วนลดตัวไหน
+  "discount_amount" numeric(10,2), -- จำนวนเงินที่ประหยัดไปได้ (บาท)
+  "applied_at" timestamptz -- เวลาที่กดใช้โค้ด
 );
 
+-- ตารางโค้ดส่วนลด (Promo Codes)
 CREATE TABLE "Discount" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "code" varchar(30) UNIQUE,
   "description" varchar(255),
-  "discount_type" varchar(10),
-  "value" numeric(10,2),
-  "valid_from" timestamptz,
-  "valid_to" timestamptz
+  "discount_type" varchar(10), -- ประเภท: 'PERCENT' (ลดเป็น %), 'FIXED' (ลดเป็นบาท)
+  "value" numeric(10,2), -- มูลค่าการลด
+  "valid_from" timestamptz, -- วันที่เริ่มใช้โค้ดได้
+  "valid_to" timestamptz -- วันที่โค้ดหมดอายุ
 );
 
+-- ตารางเก็บข้อมูลรถยนต์/มอเตอร์ไซค์ ของคนขับแต่ละคน
 CREATE TABLE "Vehicles" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "rider_id" uuid,
-  "vehicle_type_id" uuid,
-  "license_plate" varchar(15) UNIQUE,
+  "rider_id" uuid, -- FK รถคันนี้ใครเป็นคนขับ
+  "vehicle_type_id" uuid,  -- FK จัดอยู่ในรถประเภทไหน
+  "license_plate" varchar(15) UNIQUE, -- ทะเบียนรถ (ต้องไม่ซ้ำในระบบ เพื่อป้องกันการสวมรอย)
   "brand" varchar(50),
   "model" varchar(50),
   "color" varchar(30),
   "year" int,
-  "status" varchar(20)
+  "status" varchar(20) -- สถานะรถ: 'ACTIVE'
 );
 
+-- ตารางเก็บข้อมูลอกสารสำคัญของคนขับสำหรับตรวจสอบความถูกต้องตามกฎหมาย เช่น ใบขับขี่สาธารณะ
 CREATE TABLE "GovermentDocuments" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "rider_id" uuid,
-  "document_type" varchar(3),
-  "document_number" varchar(30),
+  "rider_id" uuid, -- ชี้ว่าเอกสารนี้เป็นของคนขับคนไหน
+  "document_type" varchar(3), -- รหัสประเภทเอกสาร เช่น 'IDC' (บัตรปชช)
+  "document_number" varchar(30), 
   "file_url" varchar(255),
-  "verification_status" varchar(20),
-  "verified_at" timestamptz,
-  "expiry_date" date
+  "verification_status" varchar(20), -- สถานะการตรวจสอบโดย Admin: 'PENDING', 'APPROVED', 'REJECTED'
+  "verified_at" timestamptz, -- วันเวลาที่ Admin อนุมัติ
+  "expiry_date" date -- วันหมดอายุของเอกสาร
 );
 
+-- ตารางเก็บข้อมูลประเภทของยานพาหนะที่ระบบรองรับใช้สำหรับการแบ่งเกรดรถ
 CREATE TABLE "VechiclesTypes" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "name" varchar(50),
-  "description" varchar(255),
-  "base_fare" numeric(10,2),
+  "name" varchar(50), -- ชื่อประเภท เช่น 'Economy Car', 'Premium SUV', 'Motorcycle'
+  "description" varchar(255), -- คำอธิบายให้ผู้โดยสารเห็น
+  "base_fare" numeric(10,2), -- ราคาเริ่มต้น (ค่าเรียก) *ใช้ numeric เพื่อป้องกันปัญหาตัวเลขทศนิยมคลาดเคลื่อนของ float
   "price_per_km" numeric(10,2),
-  "capacity" int
+  "capacity" int -- จำนวนผู้โดยสารสูงสุดที่รับได้
 );
 
+-- ตารางเก็บข้อมูลโครงสร้างราคาแบบขั้นบันได
 CREATE TABLE "DistanceToPrice" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "min_distance_km" numeric(6,2),
-  "max_distance_km" numeric(6,2),
-  "price_per_km" numeric(10,2)
+  "min_distance_km" numeric(6,2), -- ระยะทางเริ่มต้นของขั้นนี้
+  "max_distance_km" numeric(6,2), -- ระยะทางสิ้นสุดของขั้นนี้
+  "price_per_km" numeric(10,2) -- อัตราค่าบริการในขั้นระยะทางนี้
 );
 
+-- ตารางเก็บข้อมูลตัวคูณราคาตามช่วงเวลา 
+-- ระบบจะดึงค่านี้ไปคูณราคาปกติเมื่อมีการเรียกรถในช่วงเวลาที่กำหนด
 CREATE TABLE "TimePriceMultiplier" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "name" varchar(50),
+  "name" varchar(50), -- ชื่อช่วงเวลา เช่น 'Morning Rush', 'Midnight Charge
   "start_time" time,
   "end_time" time,
-  "multiplier" numeric(4,2)
+  "multiplier" numeric(4,2) -- ตัวคูณราคา
 );
 
+-- ตารางเก็บข้อมูลบันทึกร่องรอยการแก้ไขข้อมูล 
+-- สำคัญมากสำหรับระบบที่เกี่ยวกับเงินและการเดินทาง เพื่อป้องกันการทุจริต หรือตามสืบเคสปัญหา
 CREATE TABLE "Audit Log" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "table_name" varchar(50),
-  "record_id" uuid,
+  "table_name" varchar(50), -- ชื่อตารางที่มีการแก้ไข
+  "record_id" uuid, -- ID ของแถวที่ถูกแก้ไข
   "old_value" text,
   "new_value" text,
-  "created_at" timestamptz
+  "created_at" timestamptz -- เวลาที่มีการแก้ไข
 );
 
+-- ตาราง rider เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง Rider) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- Relationship: 1 to 1 (ผู้ใช้งาน 1 คน เป็นคนขับได้ 1 บัญชี)
 ALTER TABLE "Rider"
 	ADD CONSTRAINT "fk_Rider_user_id _users"
 	FOREIGN KEY ("user_id")
@@ -171,6 +194,9 @@ ALTER TABLE "Rider"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง GovermentDocuments เชื่อมกับตาราง Rider
+-- FK: "rider_id" (ในตารางGovermentDocuments ) อ้างอิงไปยัง PK: "id" (ในตาราง Rider)
+-- Relationship: 1 to many (คนขับ 1 คน มีเอกสารสำคัญได้หลายใบ)
 ALTER TABLE "GovermentDocuments"
 	ADD CONSTRAINT "fk_GovermentDocuments_rider_id_Rider"
 	FOREIGN KEY ("rider_id")
@@ -178,6 +204,9 @@ ALTER TABLE "GovermentDocuments"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Vehicles เชื่อมกับตาราง Rider
+-- FK: "rider_id" (ในตาราง Vehicles ) อ้างอิงไปยัง PK: "id" (ในตาราง Rider)
+-- Relationship: 1 to many (คนขับ 1 คน ลงทะเบียนรถได้หลายคัน))
 ALTER TABLE "Vehicles"
 	ADD CONSTRAINT "fk_Vehicles_rider_id_Rider"
 	FOREIGN KEY ("rider_id")
@@ -185,13 +214,20 @@ ALTER TABLE "Vehicles"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Vehicles เชื่อมกับตาราง VechiclesTypes
+-- FK: "vehicle_type_id" (ในตาราง Vehicles ) อ้างอิงไปยัง PK: "id" (ในตาราง VechiclesTypes)
+-- Relationship: 1 to many (ประเภทรถ 1 ประเภท มีรถอยู่ในหมวดหมู่นี้ได้หลายคัน)
 ALTER TABLE "Vehicles"
 	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VechiclesTypes"
-	FOREIGN KEY ("vehicle_type_id")
+	FOREIGN KEY ("vehicle_type_id") 
 	REFERENCES "VechiclesTypes" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+
+-- ตาราง RideRequest เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง RideRequest) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- Relationship: 1 to many (ผู้ใช้งาน 1 คน สร้างคำเรียกรถได้หลายครั้ง)
 ALTER TABLE "RideRequest"
 	ADD CONSTRAINT "fk_RideRequest_user_id _users"
 	FOREIGN KEY ("user_id")
@@ -199,6 +235,9 @@ ALTER TABLE "RideRequest"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง RideHistory เชื่อมกับตาราง RideRequest
+-- FK: "ride_request_id" (ในตาราง RideHistory) อ้างอิงไปยัง PK: "id" (ในตาราง RideRequest)
+-- Relationship: 1 to 1 (คำเรียกรถ 1 ครั้ง ถูกบันทึกเป็นประวัติการเดินทาง 1 รายการ)
 ALTER TABLE "RideHistory"
 	ADD CONSTRAINT "fk_RideHistory_ride_request_id_RideRequest"
 	FOREIGN KEY ("ride_request_id")
@@ -206,6 +245,9 @@ ALTER TABLE "RideHistory"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง RideHistory เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง RideHistory) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- Relationship: 1 to many (ผู้ใช้งาน 1 คน มีประวัติการเดินทางได้หลายครั้ง)
 ALTER TABLE "RideHistory"
 	ADD CONSTRAINT "fk_RideHistory_user_id_users"
 	FOREIGN KEY ("user_id")
@@ -213,6 +255,9 @@ ALTER TABLE "RideHistory"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง RideHistory เชื่อมกับตาราง Rider
+-- FK: "rider_id" (ในตาราง RideHistory) อ้างอิงไปยัง PK: "id" (ในตาราง Rider)
+-- Relationship: 1 to many (คนขับ 1 คน มีประวัติการให้บริการได้หลายครั้ง)
 ALTER TABLE "RideHistory"
 	ADD CONSTRAINT "fk_RideHistory_rider_id_Rider"
 	FOREIGN KEY ("rider_id")
@@ -220,6 +265,9 @@ ALTER TABLE "RideHistory"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง RideHistory เชื่อมกับตาราง Vehicles
+-- FK: "vehicle_id" (ในตาราง RideHistory) อ้างอิงไปยัง PK: "id" (ในตาราง Vehicles)
+-- Relationship: 1 to many (รถ 1 คัน ถูกใช้ในประวัติการเดินทางได้หลายครั้ง)
 ALTER TABLE "RideHistory"
 	ADD CONSTRAINT "fk_RideHistory_vehicle_id_Vehicles"
 	FOREIGN KEY ("vehicle_id")
@@ -227,6 +275,9 @@ ALTER TABLE "RideHistory"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Payment Methods เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง Payment Methods) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- Relationship: 1 to many (ผู้ใช้งาน 1 คน มีช่องทางชำระเงินได้หลายวิธี)
 ALTER TABLE "Payment Methods"
 	ADD CONSTRAINT "fk_users_id_Payment Methods"
 	FOREIGN KEY ("user_id")
@@ -234,6 +285,9 @@ ALTER TABLE "Payment Methods"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Payment History เชื่อมกับตาราง RideHistory
+-- FK: "ride_history_id" (ในตาราง Payment History) อ้างอิงไปยัง PK: "id" (ในตาราง RideHistory)
+-- Relationship: 1 to 1 (ประวัติการเดินทาง 1 ครั้ง มีประวัติการชำระเงิน 1 รายการ)
 ALTER TABLE "Payment History"
 	ADD CONSTRAINT "fk_Payment History_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
@@ -241,6 +295,9 @@ ALTER TABLE "Payment History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Payment History เชื่อมกับตาราง Payment Methods
+-- FK: "payment_method_id" (ในตาราง Payment History) อ้างอิงไปยัง PK: "id" (ในตาราง Payment Methods)
+-- Relationship: 1 to many (ช่องทางชำระเงิน 1 วิธี ถูกใช้ทำรายการชำระเงินได้หลายครั้ง)
 ALTER TABLE "Payment History"
 	ADD CONSTRAINT "fk_Payment History_payment_method_id_Payment Methods"
 	FOREIGN KEY ("payment_method_id")
@@ -248,6 +305,9 @@ ALTER TABLE "Payment History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Review เชื่อมกับตาราง Payment History
+-- FK: "ride_history_id" (ในตาราง Review) อ้างอิงไปยัง PK: "id" (ในตาราง Payment History)
+-- Relationship: 1 to 1 (การชำระเงิน 1 รายการ มีรีวิวได้ 1 ครั้ง)
 ALTER TABLE "Review"
 	ADD CONSTRAINT "fk_Review_ride_history_id_Payment History"
 	FOREIGN KEY ("ride_history_id")
@@ -255,6 +315,9 @@ ALTER TABLE "Review"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Discount History เชื่อมกับตาราง Payment History
+-- FK: "payment_history_id" (ในตาราง Discount History) อ้างอิงไปยัง PK: "id" (ในตาราง Payment History)
+-- Relationship: 1 to many (การชำระเงิน 1 รายการ อาจมีการบันทึกประวัติการใช้ส่วนลดได้หลายรายการ หากใช้ร่วมกันได้)
 ALTER TABLE "Discount History"
 	ADD CONSTRAINT "fk_Discount History_payment_history_id_Payment History"
 	FOREIGN KEY ("payment_history_id")
@@ -262,6 +325,9 @@ ALTER TABLE "Discount History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Discount History เชื่อมกับตาราง Discount
+-- FK: "discount_id" (ในตาราง Discount History) อ้างอิงไปยัง PK: "id" (ในตาราง Discount)
+-- Relationship: 1 to many (รหัสส่วนลด 1 โค้ด ถูกบันทึกลงในประวัติการใช้งานได้หลายครั้ง)
 ALTER TABLE "Discount History"
 	ADD CONSTRAINT "fk_Discount History_discount_id_Discount"
 	FOREIGN KEY ("discount_id")
@@ -269,6 +335,9 @@ ALTER TABLE "Discount History"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
+-- ตาราง Phon_user เชื่อมกับตาราง users
+-- FK: "user_id" (ในตาราง Phon_user) อ้างอิงไปยัง PK: "id" (ในตาราง users)
+-- Relationship: 1 to many (ผู้ใช้งาน 1 คน ลงทะเบียนเบอร์โทรศัพท์ได้หลายเบอร์)
 ALTER TABLE "Phon_user"
 	ADD CONSTRAINT "fk_Phon_user_user_id_users"
 	FOREIGN KEY ("user_id")
