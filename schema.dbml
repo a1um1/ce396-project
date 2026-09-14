@@ -4,8 +4,8 @@ Table users [headercolor: #6360f7] {
 	email varchar(150) [ not null, unique ]
 	password_hash varchar(255) [ not null ]
 	profile_image varchar(255) [ not null ]
-	created_at timestamptz [ not null ]
-	update_at timestamptz [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
+	update_at timestamptz [ not null, default: `now()` ]
 }
 
 Table Phon_user [headercolor: #175e7a] {
@@ -20,7 +20,7 @@ Table Rider [headercolor: #36e094] {
 	id_card_number varchar(20) [ not null ]
 	status varchar(20) [ not null ]
 	total_rides int [ not null ]
-	created_at timestamptz [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
 }
 
 Table RideRequest [headercolor: #42c96d] {
@@ -34,7 +34,7 @@ Table RideRequest [headercolor: #42c96d] {
 	dropoff_lng numeric(9,6) [ not null ]
 	dropoff_address varchar(255) [ not null ]
 	status varchar(20) [ not null ]
-	requested_at timestamptz [ not null ]
+	requested_at timestamptz [ not null, default: `now()` ]
 }
 
 Table RideHistory [headercolor: #0b8c52] {
@@ -47,8 +47,8 @@ Table RideHistory [headercolor: #0b8c52] {
 	duration_min int [ not null ]
 	base_price numeric(10,2) [ not null ]
 	final_price numeric(10,2) [ not null ]
-	start_time timestamptz [ not null ]
-	end_time timestamptz [ not null ]
+	start_time timestamptz [ not null, default: `now()` ]
+	end_time timestamptz [ not null, default: `now()` ]
 	status varchar(20) [ not null ]
 }
 
@@ -57,7 +57,7 @@ Table Review [headercolor: #07b5fa] {
 	ride_history_id uuid [ not null, unique ]
 	rating int [ not null ]
 	comment text [ not null ]
-	created_at timestamptz [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
 }
 
 Table "Payment History" [headercolor: #d60d0d] {
@@ -66,7 +66,7 @@ Table "Payment History" [headercolor: #d60d0d] {
 	payment_method_id uuid [ not null ]
 	amount numeric(10,2) [ not null ]
 	status varchar(20) [ not null ]
-	paid_at timestamptz [ not null ]
+	paid_at timestamptz [ not null, default: `now()` ]
 }
 
 Table "Payment Methods" [headercolor: #ff0a5c] {
@@ -83,7 +83,7 @@ Table "Discount History" [headercolor: #cf11fa] {
 	payment_history_id uuid [ not null ]
 	discount_id uuid [ not null ]
 	discount_amount numeric(10,2) [ not null ]
-	applied_at timestamptz [ not null ]
+	applied_at timestamptz [ not null, default: `now()` ]
 }
 
 Table Discount [headercolor: #ee81fc] {
@@ -92,8 +92,8 @@ Table Discount [headercolor: #ee81fc] {
 	description varchar(255) [ not null ]
 	discount_type varchar(10) [ not null ]
 	value numeric(10,2) [ not null ]
-	valid_from timestamptz [ not null ]
-	valid_to timestamptz [ not null ]
+	valid_from timestamptz [ not null, default: `now()` ]
+	valid_to timestamptz [ not null, default: `now()` ]
 }
 
 Table Vehicles [headercolor: #fce028] {
@@ -115,7 +115,7 @@ Table GovermentDocuments [headercolor: #ff6e3d] {
 	document_number varchar(30) [ not null ]
 	file_url varchar(255) [ not null ]
 	verification_status varchar(20) [ not null ]
-	verified_at timestamptz [ not null ]
+	verified_at timestamptz [ not null, default: `now()` ]
 	expiry_date date [ not null ]
 }
 
@@ -149,7 +149,7 @@ Table "Audit Log" [headercolor: #175e7a] {
 	record_id uuid [ not null ]
 	old_value text [ not null ]
 	new_value text [ not null ]
-	created_at timestamptz [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
 }
 
 Ref "fk_Rider_user_id _users" {
@@ -169,15 +169,15 @@ Ref fk_Vehicles_vehicle_type_id_VechiclesTypes {
 }
 
 Ref "fk_RideRequest_user_id _users" {
-	RideRequest.user_id > users.id [ delete: set null, update: no action ]
+	RideRequest.user_id > users.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_RideHistory_ride_request_id_RideRequest {
-	RideHistory.ride_request_id > RideRequest.id [ delete: set null, update: no action ]
+	RideHistory.ride_request_id > RideRequest.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_RideHistory_user_id_users {
-	RideHistory.user_id > users.id [ delete: set null, update: no action ]
+	RideHistory.user_id > users.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_RideHistory_rider_id_Rider {
@@ -189,7 +189,7 @@ Ref fk_RideHistory_vehicle_id_Vehicles {
 }
 
 Ref "fk_users_id_Payment Methods" {
-	users.id < "Payment Methods".user_id [ delete: cascade, update: no action ]
+	users.id < "Payment Methods".user_id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_Payment History_ride_history_id_RideHistory" {
