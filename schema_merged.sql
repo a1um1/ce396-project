@@ -71,7 +71,7 @@ CREATE TABLE "Review" (
 
 -- ตารางประวัติการชำระเงินของการเดินทางแต่ละรอบ
 CREATE TABLE "Payment_History" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_history_id" uuid,
   "payment_method_id" uuid, -- จ่ายด้วยช่องทางไหน
   "amount" numeric(10,2),
@@ -178,10 +178,10 @@ CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("docu
 -- ตาราง rider เชื่อมกับตาราง users
 -- FK: "user_id" (ในตาราง Rider) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to 1 (ผู้ใช้งาน 1 คน เป็นคนขับได้ 1 บัญชี)
-ALTER TABLE "Rider"
+ALTER TABLE "users"
 	ADD CONSTRAINT "fk_Rider_user_id_users"
-	FOREIGN KEY ("user_id")
-	REFERENCES "users" ("id")
+	FOREIGN KEY ("id")
+	REFERENCES "Rider" ("user_id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
