@@ -16,7 +16,7 @@ Table Phone_user [headercolor: #175e7a] {
 
 Table Rider [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
-	user_id uuid
+	user_id uuid [unique]
 	status varchar(20)
 	total_rides int
 	created_at timestamptz
