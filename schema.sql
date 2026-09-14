@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-14T05:58:05.977Z
+-- Generated at: 2026-09-14T06:21:30.882Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -77,7 +77,7 @@ CREATE TABLE "Payment_Methods" (
   "user_id" uuid NOT NULL,
   "type" varchar(20) NOT NULL,
   "provider" varchar(50) NOT NULL,
-  "account_nimber" varchar(30) NOT NULL,
+  "account_number" varchar(30) NOT NULL,
   "is_default" boolean NOT NULL
 );
 
