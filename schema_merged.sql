@@ -39,9 +39,9 @@ CREATE TABLE "RideRequest" (
   "pickup_address" varchar(255) NOT NULL,
   "dropoff_lat" numeric(9,6) NOT NULL, -- พิกัดส่ง
   "dropoff_lng" numeric(9,6) NOT NULL,
-  "dropoff_address" varchar(255),
+  "dropoff_address" varchar(255) NOT NULL,,
   "status" varchar(20) NOT NULL, -- สถานะ (Searching , Accepted, Cancelled)
-  "requested_at" timestamptz
+  "requested_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 -- ตารางประวัติการเดินทาง (เมื่อคนขับรับงานแล้ว)
