@@ -164,7 +164,7 @@ CREATE TABLE "TimePriceMultiplier" (
 
 -- ตารางเก็บข้อมูลบันทึกร่องรอยการแก้ไขข้อมูล 
 -- สำคัญมากสำหรับระบบที่เกี่ยวกับเงินและการเดินทาง เพื่อป้องกันการทุจริต หรือตามสืบเคสปัญหา
-CREATE TABLE "Audit Log" (
+CREATE TABLE "Audit_Log" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "table_name" varchar(50), -- ชื่อตารางที่มีการแก้ไข
   "record_id" uuid, -- ID ของแถวที่ถูกแก้ไข
@@ -179,7 +179,7 @@ CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("docu
 -- FK: "user_id" (ในตาราง Rider) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to 1 (ผู้ใช้งาน 1 คน เป็นคนขับได้ 1 บัญชี)
 ALTER TABLE "Rider"
-	ADD CONSTRAINT "fk_Rider_user_id _users"
+	ADD CONSTRAINT "fk_Rider_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
@@ -220,7 +220,7 @@ ALTER TABLE "Vehicles"
 -- FK: "user_id" (ในตาราง RideRequest) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to many (ผู้ใช้งาน 1 คน สร้างคำเรียกรถได้หลายครั้ง)
 ALTER TABLE "RideRequest"
-	ADD CONSTRAINT "fk_RideRequest_user_id _users"
+	ADD CONSTRAINT "fk_RideRequest_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION

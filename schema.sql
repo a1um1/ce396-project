@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-14T02:27:05.644Z
+-- Generated at: 2026-09-14T03:28:09.427Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -20,7 +20,7 @@ CREATE TABLE "Phone_user" (
 
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "user_id" uuid,
+  "user_id" uuid UNIQUE,
   "status" varchar(20),
   "total_rides" int,
   "created_at" timestamptz
@@ -64,7 +64,7 @@ CREATE TABLE "Review" (
 );
 
 CREATE TABLE "Payment_History" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_history_id" uuid,
   "payment_method_id" uuid,
   "amount" numeric(10,2),
@@ -146,7 +146,7 @@ CREATE TABLE "TimePriceMultiplier" (
   "multiplier" numeric(4,2)
 );
 
-CREATE TABLE "Audit Log" (
+CREATE TABLE "Audit_Log" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "table_name" varchar(50),
   "record_id" uuid,
@@ -157,10 +157,10 @@ CREATE TABLE "Audit Log" (
 
 CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("document_type", "document_number");
 
-ALTER TABLE "Rider"
-	ADD CONSTRAINT "fk_Rider_user_id _users"
-	FOREIGN KEY ("user_id")
-	REFERENCES "users" ("id")
+ALTER TABLE "users"
+	ADD CONSTRAINT "fk_Rider_user_id_users"
+	FOREIGN KEY ("id")
+	REFERENCES "Rider" ("user_id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
@@ -186,7 +186,7 @@ ALTER TABLE "Vehicles"
 	ON UPDATE NO ACTION;
 
 ALTER TABLE "RideRequest"
-	ADD CONSTRAINT "fk_RideRequest_user_id _users"
+	ADD CONSTRAINT "fk_RideRequest_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION

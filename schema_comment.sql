@@ -70,7 +70,7 @@ CREATE TABLE "Review" (
 );
 
 -- ตารางประวัติการชำระเงินของการเดินทางแต่ละรอบ
-CREATE TABLE "Payment History" (
+CREATE TABLE "Payment_History" (
   "id" uuid PRIMARY KEY NOT NULL,
   "ride_history_id" uuid,
   "payment_method_id" uuid, -- จ่ายด้วยช่องทางไหน
@@ -80,7 +80,7 @@ CREATE TABLE "Payment History" (
 );
 
 -- ตารางช่องทางการชำระเงินของผู้ใช้ (บัตรเครดิต, ธนาคาร)
-CREATE TABLE "Payment Methods" (
+CREATE TABLE "Payment_Methods" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "type" varchar(20), -- ประเภท: 'CREDIT_CARD', 'CASH'
@@ -90,7 +90,7 @@ CREATE TABLE "Payment Methods" (
 );
 
 -- ตารางบันทึกประวัติการใช้งานโค้ดส่วนลด
-CREATE TABLE "Discount History" (
+CREATE TABLE "Discount_History" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "payment_history_id" uuid, -- ลดในการจ่ายเงินบิลไหน
   "discount_id" uuid, -- ใช้โค้ดส่วนลดตัวไหน
@@ -164,7 +164,7 @@ CREATE TABLE "TimePriceMultiplier" (
 
 -- ตารางเก็บข้อมูลบันทึกร่องรอยการแก้ไขข้อมูล 
 -- สำคัญมากสำหรับระบบที่เกี่ยวกับเงินและการเดินทาง เพื่อป้องกันการทุจริต หรือตามสืบเคสปัญหา
-CREATE TABLE "Audit Log" (
+CREATE TABLE "Audit_Log" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "table_name" varchar(50), -- ชื่อตารางที่มีการแก้ไข
   "record_id" uuid, -- ID ของแถวที่ถูกแก้ไข
@@ -179,7 +179,7 @@ CREATE UNIQUE INDEX "GovermentDocuments_unique_0" ON "GovermentDocuments" ("docu
 -- FK: "user_id" (ในตาราง Rider) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to 1 (ผู้ใช้งาน 1 คน เป็นคนขับได้ 1 บัญชี)
 ALTER TABLE "Rider"
-	ADD CONSTRAINT "fk_Rider_user_id _users"
+	ADD CONSTRAINT "fk_Rider_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
@@ -220,7 +220,7 @@ ALTER TABLE "Vehicles"
 -- FK: "user_id" (ในตาราง RideRequest) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to many (ผู้ใช้งาน 1 คน สร้างคำเรียกรถได้หลายครั้ง)
 ALTER TABLE "RideRequest"
-	ADD CONSTRAINT "fk_RideRequest_user_id _users"
+	ADD CONSTRAINT "fk_RideRequest_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
@@ -269,8 +269,8 @@ ALTER TABLE "RideHistory"
 -- ตาราง Payment Methods เชื่อมกับตาราง users
 -- FK: "user_id" (ในตาราง Payment Methods) อ้างอิงไปยัง PK: "id" (ในตาราง users)
 -- Relationship: 1 to many (ผู้ใช้งาน 1 คน มีช่องทางชำระเงินได้หลายวิธี)
-ALTER TABLE "Payment Methods"
-	ADD CONSTRAINT "fk_users_id_Payment Methods"
+ALTER TABLE "Payment_Methods"
+	ADD CONSTRAINT "fk_users_id_Payment_Methods"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
@@ -279,8 +279,8 @@ ALTER TABLE "Payment Methods"
 -- ตาราง Payment History เชื่อมกับตาราง RideHistory
 -- FK: "ride_history_id" (ในตาราง Payment History) อ้างอิงไปยัง PK: "id" (ในตาราง RideHistory)
 -- Relationship: 1 to 1 (ประวัติการเดินทาง 1 ครั้ง มีประวัติการชำระเงิน 1 รายการ)
-ALTER TABLE "Payment History"
-	ADD CONSTRAINT "fk_Payment History_ride_history_id_RideHistory"
+ALTER TABLE "Payment_History"
+	ADD CONSTRAINT "fk_Payment_History_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
 	REFERENCES "RideHistory" ("id")
 	ON DELETE NO ACTION
@@ -289,10 +289,10 @@ ALTER TABLE "Payment History"
 -- ตาราง Payment History เชื่อมกับตาราง Payment Methods
 -- FK: "payment_method_id" (ในตาราง Payment History) อ้างอิงไปยัง PK: "id" (ในตาราง Payment Methods)
 -- Relationship: 1 to many (ช่องทางชำระเงิน 1 วิธี ถูกใช้ทำรายการชำระเงินได้หลายครั้ง)
-ALTER TABLE "Payment History"
-	ADD CONSTRAINT "fk_Payment History_payment_method_id_Payment Methods"
+ALTER TABLE "Payment_History"
+	ADD CONSTRAINT "fk_Payment_History_payment_method_id_Payment_Methods"
 	FOREIGN KEY ("payment_method_id")
-	REFERENCES "Payment Methods" ("id")
+	REFERENCES "Payment_Methods" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
@@ -309,18 +309,18 @@ ALTER TABLE "Review"
 -- ตาราง Discount History เชื่อมกับตาราง Payment History
 -- FK: "payment_history_id" (ในตาราง Discount History) อ้างอิงไปยัง PK: "id" (ในตาราง Payment History)
 -- Relationship: 1 to many (การชำระเงิน 1 รายการ อาจมีการบันทึกประวัติการใช้ส่วนลดได้หลายรายการ หากใช้ร่วมกันได้)
-ALTER TABLE "Discount History"
-	ADD CONSTRAINT "fk_Discount History_payment_history_id_Payment History"
+ALTER TABLE "Discount_History"
+	ADD CONSTRAINT "fk_Discount_History_payment_history_id_Payment_History"
 	FOREIGN KEY ("payment_history_id")
-	REFERENCES "Payment History" ("id")
+	REFERENCES "Payment_History" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
 -- ตาราง Discount History เชื่อมกับตาราง Discount
 -- FK: "discount_id" (ในตาราง Discount History) อ้างอิงไปยัง PK: "id" (ในตาราง Discount)
 -- Relationship: 1 to many (รหัสส่วนลด 1 โค้ด ถูกบันทึกลงในประวัติการใช้งานได้หลายครั้ง)
-ALTER TABLE "Discount History"
-	ADD CONSTRAINT "fk_Discount History_discount_id_Discount"
+ALTER TABLE "Discount_History"
+	ADD CONSTRAINT "fk_Discount_History_discount_id_Discount"
 	FOREIGN KEY ("discount_id")
 	REFERENCES "Discount" ("id")
 	ON DELETE NO ACTION
