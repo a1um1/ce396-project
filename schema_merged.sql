@@ -23,7 +23,7 @@ CREATE TABLE "Phone_user" (
 -- เก็บข้อมูลเฉพาะ Rider
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "user_id" uuid,
+  "user_id" uuid UNIQUE,
   "status" varchar(20), -- สถานะการทำงาน
   "total_rides" int, -- สถิติจำนวนรอบที่ให้บริการสำเร็จ
   "created_at" timestamptz -- วันที่สมัครเป็นคนขับ
