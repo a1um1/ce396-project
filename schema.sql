@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-14T05:47:32.914Z
+-- Generated at: 2026-09-14T05:58:05.977Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -12,7 +12,7 @@ CREATE TABLE "users" (
   "update_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE "Phon_user" (
+CREATE TABLE "Phone_user" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid NOT NULL,
   "phone_number" varchar(20) UNIQUE NOT NULL
@@ -20,8 +20,7 @@ CREATE TABLE "Phon_user" (
 
 CREATE TABLE "Rider" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
-  "user_id" uuid NOT NULL,
-  "id_card_number" varchar(20) NOT NULL,
+  "user_id" uuid UNIQUE NOT NULL,
   "status" varchar(20) NOT NULL,
   "total_rides" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
@@ -65,7 +64,7 @@ CREATE TABLE "Review" (
 );
 
 CREATE TABLE "Payment_History" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "ride_history_id" uuid NOT NULL,
   "payment_method_id" uuid NOT NULL,
   "amount" numeric(10,2) NOT NULL,
@@ -123,7 +122,7 @@ CREATE TABLE "GovermentDocuments" (
   "expiry_date" date NOT NULL
 );
 
-CREATE TABLE "VechiclesTypes" (
+CREATE TABLE "VehiclesTypes" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "name" varchar(50) NOT NULL,
   "description" varchar(255) NOT NULL,
@@ -178,9 +177,9 @@ ALTER TABLE "Vehicles"
 	ON UPDATE NO ACTION;
 
 ALTER TABLE "Vehicles"
-	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VechiclesTypes"
+	ADD CONSTRAINT "fk_Vehicles_vehicle_type_id_VehiclesTypes"
 	FOREIGN KEY ("vehicle_type_id")
-	REFERENCES "VechiclesTypes" ("id")
+	REFERENCES "VehiclesTypes" ("id")
 	ON DELETE RESTRICT
 	ON UPDATE NO ACTION;
 
@@ -241,9 +240,9 @@ ALTER TABLE "Payment_History"
 	ON UPDATE NO ACTION;
 
 ALTER TABLE "Review"
-	ADD CONSTRAINT "fk_Review_ride_history_id_Payment_History"
+	ADD CONSTRAINT "fk_Review_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
-	REFERENCES "Payment_History" ("id")
+	REFERENCES "RideHistory" ("id")
 	ON DELETE RESTRICT
 	ON UPDATE NO ACTION;
 
@@ -261,8 +260,8 @@ ALTER TABLE "Discount_History"
 	ON DELETE RESTRICT
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Phon_user"
-	ADD CONSTRAINT "fk_Phon_user_user_id_users"
+ALTER TABLE "Phone_user"
+	ADD CONSTRAINT "fk_Phone_user_user_id_users"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE RESTRICT
