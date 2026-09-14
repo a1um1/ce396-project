@@ -59,7 +59,7 @@ Table Review [headercolor: #07b5fa] {
 	created_at timestamptz
 }
 
-Table "Payment History" [headercolor: #d60d0d] {
+Table Payment_History [headercolor: #d60d0d] {
 	id uuid [ pk, not null ]
 	ride_history_id uuid
 	payment_method_id uuid
@@ -68,7 +68,7 @@ Table "Payment History" [headercolor: #d60d0d] {
 	paid_at timestamptz
 }
 
-Table "Payment Methods" [headercolor: #ff0a5c] {
+Table Payment_Methods [headercolor: #ff0a5c] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid
 	type varchar(20)
@@ -77,7 +77,7 @@ Table "Payment Methods" [headercolor: #ff0a5c] {
 	is_default boolean
 }
 
-Table "Discount History" [headercolor: #cf11fa] {
+Table Discount_History [headercolor: #cf11fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	payment_history_id uuid
 	discount_id uuid
@@ -191,28 +191,28 @@ Ref fk_RideHistory_vehicle_id_Vehicles {
 	RideHistory.vehicle_id > Vehicles.id [ delete: no action, update: no action ]
 }
 
-Ref "fk_users_id_Payment Methods" {
-	users.id < "Payment Methods".user_id [ delete: no action, update: no action ]
+Ref "fk_users_id_Payment_Methods" {
+	users.id < Payment_Methods.user_id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Payment History_ride_history_id_RideHistory" {
-	"Payment History".ride_history_id > RideHistory.id [ delete: no action, update: no action ]
+Ref "fk_Payment_History_ride_history_id_RideHistory" {
+	Payment_History.ride_history_id > RideHistory.id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Payment History_payment_method_id_Payment Methods" {
-	"Payment History".payment_method_id > "Payment Methods".id [ delete: no action, update: no action ]
+Ref "fk_Payment_History_payment_method_id_Payment_Methods" {
+	Payment_History.payment_method_id > Payment_Methods.id [ delete: no action, update: no action ]
 }
 
 Ref fk_Review_ride_history_id_RideHistory {
 	Review.ride_history_id > RideHistory.id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Discount History_payment_history_id_Payment History" {
-	"Discount History".payment_history_id > "Payment History".id [ delete: no action, update: no action ]
+Ref "fk_Discount_History_payment_history_id_Payment_History" {
+	Discount_History.payment_history_id > Payment_History.id [ delete: no action, update: no action ]
 }
 
-Ref "fk_Discount History_discount_id_Discount" {
-	"Discount History".discount_id > Discount.id [ delete: no action, update: no action ]
+Ref "fk_Discount_History_discount_id_Discount" {
+	Discount_History.discount_id > Discount.id [ delete: no action, update: no action ]
 }
 
 Ref fk_Phone_user_user_id_users {

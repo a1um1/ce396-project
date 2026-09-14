@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-09-13T07:54:10.191Z
+-- Generated at: 2026-09-14T02:27:05.644Z
 
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
@@ -63,7 +63,7 @@ CREATE TABLE "Review" (
   "created_at" timestamptz
 );
 
-CREATE TABLE "Payment History" (
+CREATE TABLE "Payment_History" (
   "id" uuid PRIMARY KEY NOT NULL,
   "ride_history_id" uuid,
   "payment_method_id" uuid,
@@ -72,7 +72,7 @@ CREATE TABLE "Payment History" (
   "paid_at" timestamptz
 );
 
-CREATE TABLE "Payment Methods" (
+CREATE TABLE "Payment_Methods" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "user_id" uuid,
   "type" varchar(20),
@@ -81,7 +81,7 @@ CREATE TABLE "Payment Methods" (
   "is_default" boolean
 );
 
-CREATE TABLE "Discount History" (
+CREATE TABLE "Discount_History" (
   "id" uuid PRIMARY KEY NOT NULL DEFAULT (UUIDV7()),
   "payment_history_id" uuid,
   "discount_id" uuid,
@@ -220,24 +220,24 @@ ALTER TABLE "RideHistory"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Payment Methods"
-	ADD CONSTRAINT "fk_users_id_Payment Methods"
+ALTER TABLE "Payment_Methods"
+	ADD CONSTRAINT "fk_users_id_Payment_Methods"
 	FOREIGN KEY ("user_id")
 	REFERENCES "users" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Payment History"
-	ADD CONSTRAINT "fk_Payment History_ride_history_id_RideHistory"
+ALTER TABLE "Payment_History"
+	ADD CONSTRAINT "fk_Payment_History_ride_history_id_RideHistory"
 	FOREIGN KEY ("ride_history_id")
 	REFERENCES "RideHistory" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Payment History"
-	ADD CONSTRAINT "fk_Payment History_payment_method_id_Payment Methods"
+ALTER TABLE "Payment_History"
+	ADD CONSTRAINT "fk_Payment_History_payment_method_id_Payment_Methods"
 	FOREIGN KEY ("payment_method_id")
-	REFERENCES "Payment Methods" ("id")
+	REFERENCES "Payment_Methods" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
@@ -248,15 +248,15 @@ ALTER TABLE "Review"
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Discount History"
-	ADD CONSTRAINT "fk_Discount History_payment_history_id_Payment History"
+ALTER TABLE "Discount_History"
+	ADD CONSTRAINT "fk_Discount_History_payment_history_id_Payment_History"
 	FOREIGN KEY ("payment_history_id")
-	REFERENCES "Payment History" ("id")
+	REFERENCES "Payment_History" ("id")
 	ON DELETE NO ACTION
 	ON UPDATE NO ACTION;
 
-ALTER TABLE "Discount History"
-	ADD CONSTRAINT "fk_Discount History_discount_id_Discount"
+ALTER TABLE "Discount_History"
+	ADD CONSTRAINT "fk_Discount_History_discount_id_Discount"
 	FOREIGN KEY ("discount_id")
 	REFERENCES "Discount" ("id")
 	ON DELETE NO ACTION
