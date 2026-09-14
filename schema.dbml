@@ -153,65 +153,65 @@ Table "Audit Log" [headercolor: #175e7a] {
 }
 
 Ref "fk_Rider_user_id _users" {
-	Rider.user_id > users.id [ delete: no action, update: no action ]
+	Rider.user_id - users.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_GovermentDocuments_rider_id_Rider {
-	GovermentDocuments.rider_id > Rider.id [ delete: no action, update: no action ]
+	GovermentDocuments.rider_id > Rider.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_Vehicles_rider_id_Rider {
-	Vehicles.rider_id > Rider.id [ delete: no action, update: no action ]
+	Vehicles.rider_id > Rider.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_Vehicles_vehicle_type_id_VechiclesTypes {
-	Vehicles.vehicle_type_id > VechiclesTypes.id [ delete: no action, update: no action ]
+	Vehicles.vehicle_type_id > VechiclesTypes.id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_RideRequest_user_id _users" {
-	RideRequest.user_id > users.id [ delete: no action, update: no action ]
+	RideRequest.user_id > users.id [ delete: set null, update: no action ]
 }
 
 Ref fk_RideHistory_ride_request_id_RideRequest {
-	RideHistory.ride_request_id > RideRequest.id [ delete: no action, update: no action ]
+	RideHistory.ride_request_id > RideRequest.id [ delete: set null, update: no action ]
 }
 
 Ref fk_RideHistory_user_id_users {
-	RideHistory.user_id > users.id [ delete: no action, update: no action ]
+	RideHistory.user_id > users.id [ delete: set null, update: no action ]
 }
 
 Ref fk_RideHistory_rider_id_Rider {
-	RideHistory.rider_id > Rider.id [ delete: no action, update: no action ]
+	RideHistory.rider_id > Rider.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_RideHistory_vehicle_id_Vehicles {
-	RideHistory.vehicle_id > Vehicles.id [ delete: no action, update: no action ]
+	RideHistory.vehicle_id > Vehicles.id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_users_id_Payment Methods" {
-	users.id < "Payment Methods".user_id [ delete: no action, update: no action ]
+	users.id < "Payment Methods".user_id [ delete: cascade, update: no action ]
 }
 
 Ref "fk_Payment History_ride_history_id_RideHistory" {
-	"Payment History".ride_history_id > RideHistory.id [ delete: no action, update: no action ]
+	"Payment History".ride_history_id > RideHistory.id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_Payment History_payment_method_id_Payment Methods" {
-	"Payment History".payment_method_id > "Payment Methods".id [ delete: no action, update: no action ]
+	"Payment History".payment_method_id > "Payment Methods".id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_Review_ride_history_id_Payment History" {
-	Review.ride_history_id > "Payment History".id [ delete: no action, update: no action ]
+	Review.ride_history_id > "Payment History".id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_Discount History_payment_history_id_Payment History" {
-	"Discount History".payment_history_id > "Payment History".id [ delete: no action, update: no action ]
+	"Discount History".payment_history_id > "Payment History".id [ delete: restrict, update: no action ]
 }
 
 Ref "fk_Discount History_discount_id_Discount" {
-	"Discount History".discount_id > Discount.id [ delete: no action, update: no action ]
+	"Discount History".discount_id > Discount.id [ delete: restrict, update: no action ]
 }
 
 Ref fk_Phon_user_user_id_users {
-	Phon_user.user_id > users.id [ delete: no action, update: no action ]
+	Phon_user.user_id > users.id [ delete: restrict, update: no action ]
 }
