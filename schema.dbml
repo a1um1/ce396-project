@@ -73,7 +73,7 @@ Table Payment_Methods [headercolor: #ff0a5c] {
 	user_id uuid [ not null ]
 	type varchar(20) [ not null ]
 	provider varchar(50) [ not null ]
-	account_nimber varchar(30) [ not null ]
+	account_number varchar(30) [ not null ]
 	is_default boolean [ not null ]
 }
 
