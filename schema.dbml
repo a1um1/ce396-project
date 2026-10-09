@@ -1,30 +1,35 @@
-Table users [headercolor: #6360f7] {
+// CE396 - Grab Ride database design
+// NOTE: UUIDV7() requires PostgreSQL 18+ (or the pg_uuidv7 extension).
+// NOTE: DistanceToPrice and TimePriceMultiplier are global pricing config,
+//       read at pricing time. They are intentionally not FK'd from a ride.
+
+Table Users [headercolor: #6360f7] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	name varchar(100) [ not null ]
 	email varchar(150) [ not null, unique ]
 	password_hash varchar(255) [ not null ]
-	profile_image varchar(255) [ not null ]
+	profile_image varchar(255) // nullable: user may not upload an image at signup
 	created_at timestamptz [ not null, default: `now()` ]
-	update_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
 }
 
-Table Phone_user [headercolor: #175e7a] {
+Table UserPhones [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid [ not null ]
 	phone_number varchar(20) [ not null, unique ]
 }
 
-enum riderStatus {
+enum RiderStatus {
 	"ACTIVE" // คนขับพร้อมใช้งาน
 	"INACTIVE" // คนขับไม่พร้อมใช้งาน
 	"SUSPENDED" // คนขับถูกระงับการใช้งาน
 }
 
-Table Rider [headercolor: #36e094] {
+Table Riders [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid [ not null, unique ]
-	status riderStatus [ not null ]
-	total_rides int [ not null ]
+	status RiderStatus [ not null ]
+	total_rides int [ not null, default: 0, check: `total_rides >= 0` ]
 	created_at timestamptz [ not null, default: `now()` ]
 }
 
@@ -36,76 +41,76 @@ enum RideStatus {
 	"CANCELLED" // ยกเลิกการเดินทาง
 }
 
-Table RideRequest [headercolor: #42c96d] {
+Table RideRequests [headercolor: #42c96d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid [ not null ]
+	rider_id uuid // nullable: set when a rider accepts the request
 	vehicle_type_id uuid [ not null ]
-	pickup_lat numeric(9,6) [ not null ]
-	pickup_lng numeric(9,6) [ not null ]
+	pickup_lat numeric(9,6) [ not null, check: `pickup_lat >= -90 AND pickup_lat <= 90` ]
+	pickup_lng numeric(9,6) [ not null, check: `pickup_lng >= -180 AND pickup_lng <= 180` ]
 	pickup_address varchar(255) [ not null ]
-	dropoff_lat numeric(9,6) [ not null ]
-	dropoff_lng numeric(9,6) [ not null ]
+	dropoff_lat numeric(9,6) [ not null, check: `dropoff_lat >= -90 AND dropoff_lat <= 90` ]
+	dropoff_lng numeric(9,6) [ not null, check: `dropoff_lng >= -180 AND dropoff_lng <= 180` ]
 	dropoff_address varchar(255) [ not null ]
-	status RideStatus [ not null ]
+	status RideStatus [ not null, default: `REQUESTED` ]
 	requested_at timestamptz [ not null, default: `now()` ]
 }
 
 enum RideHistoryStatus {
 	"COMPLETED" // การเดินทางเสร็จสิ้น
-	"IN_PROGRESS" // การเดินทางกำลังดำเนินอยู่
 	"CANCELLED" // การเดินทางถูกยกเลิก
 }
 
-Table RideHistory [headercolor: #0b8c52] {
+Table RideHistories [headercolor: #0b8c52] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_request_id uuid [ not null ]
-	user_id uuid [ not null ]
+	user_id uuid [ not null ] // snapshot of RideRequests.user_id at completion
 	rider_id uuid [ not null ]
 	vehicle_id uuid [ not null ]
-	distance_km numeric(6,2) [ not null ]
-	duration_min int [ not null ]
-	base_price numeric(10,2) [ not null, check: `base_price > 0` ]
-	final_price numeric(10,2) [ not null, check: `final_price > 0` ]
+	distance_km numeric(6,2) [ not null, check: `distance_km >= 0` ]
+	duration_min int [ not null, check: `duration_min >= 0` ]
+	base_price numeric(10,2) [ not null, check: `base_price >= 0` ]
+	final_price numeric(10,2) [ not null, check: `final_price >= 0` ]
 	start_time timestamptz [ not null, default: `now()` ]
-	end_time timestamptz [ not null, default: `now()` ]
+	end_time timestamptz // nullable: set when the ride ends
 	status RideHistoryStatus [ not null ]
 }
 
-Table Review [headercolor: #07b5fa] {
+Table Reviews [headercolor: #07b5fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_history_id uuid [ not null, unique ]
 	// rating ต้องอยู่ระหว่าง 1 ถึง 5
 	rating int [ not null, check: `rating >= 1 AND rating <= 5` ]
-	// comment ต้องไม่ว่าง และมีความยาวไม่เกิน 255 ตัวอักษร
-	comment varchar(255) [ not null ]
+	// comment ไม่บังคับ (ให้คะแนนได้โดยไม่ต้องเขียนคอมเมนต์)
+	comment varchar(255)
 	created_at timestamptz [ not null, default: `now()` ]
 }
 
-enum paymentStatus {
+enum PaymentStatus {
 	"PAID" // ชำระเงินแล้ว
 	"PENDING" // รอดำเนินการชำระเงิน
 	"FAILED" // การชำระเงินล้มเหลว
 }
 
-Table Payment_History [headercolor: #d60d0d] {
+Table PaymentHistories [headercolor: #d60d0d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_history_id uuid [ not null ]
 	payment_method_id uuid [ not null ]
 	amount numeric(10,2) [ not null, check: `amount > 0` ]
-	status paymentStatus [ not null, default: `PENDING` ]
-	paid_at timestamptz [ not null, default: `now()` ]
+	status PaymentStatus [ not null, default: `PENDING` ]
+	paid_at timestamptz // nullable: set only when status becomes PAID
 }
 
-Table Payment_Methods [headercolor: #ff0a5c] {
+Table PaymentMethods [headercolor: #ff0a5c] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid [ not null ]
 	type varchar(20) [ not null ]
 	provider varchar(50) [ not null ]
 	account_number varchar(30) [ not null ]
-	is_default boolean [ not null ]
+	is_default boolean [ not null, default: false ]
 }
 
-Table Discount_History [headercolor: #cf11fa] {
+Table DiscountHistories [headercolor: #cf11fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	payment_history_id uuid [ not null ]
 	discount_id uuid [ not null ]
@@ -118,17 +123,18 @@ enum DiscountType {
 	"FIXED" // ส่วนลดเป็นจำนวนเงินคงที่
 }
 
-Table Discount [headercolor: #ee81fc] {
+Table Discounts [headercolor: #ee81fc] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	code varchar(30) [ not null, unique ]
 	description varchar(255) [ not null ]
 	discount_type DiscountType [ not null ]
 	value numeric(10,2) [ not null, check: `value > 0` ]
 	valid_from timestamptz [ not null, default: `now()` ]
-	valid_to timestamptz [ not null, default: `now()` ]
+	valid_to timestamptz [ not null ] // must be provided explicitly
 
-	check: {
-		`valid_from < valid_to` // ตรวจสอบว่า valid_from ต้องน้อยกว่า valid_to
+	checks {
+		`valid_from < valid_to` [name: "valid_from_must_be_less_than_valid_to"]
+		// ตรวจสอบว่า valid_from ต้องน้อยกว่า valid_to
 	}
 }
 
@@ -146,7 +152,7 @@ Table Vehicles [headercolor: #fce028] {
 	brand varchar(50) [ not null ]
 	model varchar(50) [ not null ]
 	color varchar(30) [ not null ]
-	year int [ not null ]
+	year int [ not null, check: `year >= 1900 AND year <= 2100` ]
 	status VehicleStatus [ not null ]
 }
 
@@ -161,14 +167,14 @@ enum VerificationStatus {
 	"REJECTED" // เอกสารถูกปฏิเสธ
 }
 
-Table GovermentDocuments [headercolor: #ff6e3d] {
+Table GovernmentDocuments [headercolor: #ff6e3d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	rider_id uuid [ not null ]
 	document_type DocumentType [ not null ]
 	document_number varchar(30) [ not null ]
 	file_url varchar(255) [ not null ]
-	verification_status VerificationStatus [ not null ]
-	verified_at timestamptz [ not null, default: `now()` ]
+	verification_status VerificationStatus [ not null, default: `PENDING` ]
+	verified_at timestamptz // nullable: set only when status becomes VERIFIED
 	expiry_date date [ not null ]
 
 	Indexes {
@@ -176,102 +182,127 @@ Table GovermentDocuments [headercolor: #ff6e3d] {
 	}
 }
 
-
-Table VehiclesTypes [headercolor: #d6c315] {
+Table VehicleTypes [headercolor: #d6c315] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	name varchar(50) [ not null, unique ]
 	description varchar(255) [ not null ]
-	base_fare numeric(10,2) [ not null ]
-	price_per_km numeric(10,2) [ not null ]
-	capacity int [ not null ]
+	base_fare numeric(10,2) [ not null, check: `base_fare >= 0` ]
+	price_per_km numeric(10,2) [ not null, check: `price_per_km >= 0` ]
+	capacity int [ not null, check: `capacity > 0` ]
 }
 
-Table DistanceToPrice [headercolor: #175e7a] {
+Table DistanceToPrices [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	min_distance_km numeric(6,2) [ not null ]
 	max_distance_km numeric(6,2) [ not null ]
-	price_per_km numeric(10,2) [ not null ]
+	price_per_km numeric(10,2) [ not null, check: `price_per_km >= 0` ]
+
+	checks {
+		`min_distance_km < max_distance_km` [name: "min_must_be_less_than_max"]
+	}
 }
 
-Table TimePriceMultiplier [headercolor: #175e7a] {
+Table TimePriceMultipliers [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	name varchar(50) [ not null ]
 	start_time time [ not null ]
 	end_time time [ not null ]
-	multiplier numeric(4,2) [ not null ]
+	multiplier numeric(4,2) [ not null, check: `multiplier > 0` ]
+
+	checks {
+		`start_time < end_time` [name: "start_must_be_less_than_end"]
+	}
 }
 
-Table Audit_Log [headercolor: #175e7a] {
+enum AuditAction {
+	"CREATE"
+	"UPDATE"
+	"DELETE"
+}
+
+Table AuditLogs [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	table_name varchar(50) [ not null ]
 	record_id uuid [ not null ]
-	old_value text [ not null ]
-	new_value text [ not null ]
+	action AuditAction [ not null ]
+	changed_by uuid // nullable: actor; NULL for system-initiated changes
+	old_value text // NULL on CREATE
+	new_value text // NULL on DELETE
 	created_at timestamptz [ not null, default: `now()` ]
 }
 
-Ref fk_Rider_user_id_users {
-	Rider.user_id - users.id [ delete: restrict, update: no action ]
+Ref fk_Riders_user_id_Users {
+	Riders.user_id > Users.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_GovermentDocuments_rider_id_Rider {
-	GovermentDocuments.rider_id > Rider.id [ delete: restrict, update: no action ]
+Ref fk_UserPhones_user_id_Users {
+	UserPhones.user_id > Users.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Vehicles_rider_id_Rider {
-	Vehicles.rider_id > Rider.id [ delete: restrict, update: no action ]
+Ref fk_GovernmentDocuments_rider_id_Riders {
+	GovernmentDocuments.rider_id > Riders.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Vehicles_vehicle_type_id_VehiclesTypes {
-	Vehicles.vehicle_type_id > VehiclesTypes.id [ delete: restrict, update: no action ]
+Ref fk_Vehicles_rider_id_Riders {
+	Vehicles.rider_id > Riders.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_RideRequest_user_id_users {
-	RideRequest.user_id > users.id [ delete: restrict, update: no action ]
+Ref fk_Vehicles_vehicle_type_id_VehicleTypes {
+	Vehicles.vehicle_type_id > VehicleTypes.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_RideHistory_ride_request_id_RideRequest {
-	RideHistory.ride_request_id > RideRequest.id [ delete: restrict, update: no action ]
+Ref fk_RideRequests_user_id_Users {
+	RideRequests.user_id > Users.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_RideHistory_user_id_users {
-	RideHistory.user_id > users.id [ delete: restrict, update: no action ]
+Ref fk_RideRequests_rider_id_Riders {
+	RideRequests.rider_id > Riders.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_RideHistory_rider_id_Rider {
-	RideHistory.rider_id > Rider.id [ delete: restrict, update: no action ]
+Ref fk_RideRequests_vehicle_type_id_VehicleTypes {
+	RideRequests.vehicle_type_id > VehicleTypes.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_RideHistory_vehicle_id_Vehicles {
-	RideHistory.vehicle_id > Vehicles.id [ delete: restrict, update: no action ]
+Ref fk_RideHistories_ride_request_id_RideRequests {
+	RideHistories.ride_request_id > RideRequests.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_users_id_Payment_Methods {
-	users.id < Payment_Methods.user_id [ delete: restrict, update: no action ]
+Ref fk_RideHistories_user_id_Users {
+	RideHistories.user_id > Users.id [ delete: restrict, update: no action ]
 }
 
-
-Ref fk_Payment_History_ride_history_id_RideHistory {
-	Payment_History.ride_history_id > RideHistory.id [ delete: restrict, update: no action ]
+Ref fk_RideHistories_rider_id_Riders {
+	RideHistories.rider_id > Riders.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Payment_History_payment_method_id_Payment_Methods {
-	Payment_History.payment_method_id > Payment_Methods.id [ delete: restrict, update: no action ]
+Ref fk_RideHistories_vehicle_id_Vehicles {
+	RideHistories.vehicle_id > Vehicles.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Review_ride_history_id_RideHistory {
-	Review.ride_history_id > RideHistory.id [ delete: restrict, update: no action ]
+Ref fk_PaymentMethods_user_id_Users {
+	PaymentMethods.user_id > Users.id [ delete: restrict, update: no action ]
 }
 
-
-Ref fk_Discount_History_payment_history_id_Payment_History {
-	Discount_History.payment_history_id > Payment_History.id [ delete: restrict, update: no action ]
+Ref fk_PaymentHistories_ride_history_id_RideHistories {
+	PaymentHistories.ride_history_id > RideHistories.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Discount_History_discount_id_Discount {
-	Discount_History.discount_id > Discount.id [ delete: restrict, update: no action ]
+Ref fk_PaymentHistories_payment_method_id_PaymentMethods {
+	PaymentHistories.payment_method_id > PaymentMethods.id [ delete: restrict, update: no action ]
 }
 
-Ref fk_Phone_user_user_id_users {
-	Phone_user.user_id > users.id [ delete: restrict, update: no action ]
+Ref fk_Reviews_ride_history_id_RideHistories {
+	Reviews.ride_history_id > RideHistories.id [ delete: restrict, update: no action ]
+}
+
+Ref fk_DiscountHistories_payment_history_id_PaymentHistories {
+	DiscountHistories.payment_history_id > PaymentHistories.id [ delete: restrict, update: no action ]
+}
+
+Ref fk_DiscountHistories_discount_id_Discounts {
+	DiscountHistories.discount_id > Discounts.id [ delete: restrict, update: no action ]
+}
+
+Ref fk_AuditLogs_changed_by_Users {
+	AuditLogs.changed_by > Users.id [ delete: restrict, update: no action ]
 }
