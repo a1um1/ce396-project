@@ -14,12 +14,26 @@ Table Phone_user [headercolor: #175e7a] {
 	phone_number varchar(20) [ not null, unique ]
 }
 
+enum riderStatus {
+	"ACTIVE" // คนขับพร้อมใช้งาน
+	"INACTIVE" // คนขับไม่พร้อมใช้งาน
+	"SUSPENDED" // คนขับถูกระงับการใช้งาน
+}
+
 Table Rider [headercolor: #36e094] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	user_id uuid [ not null, unique ]
-	status varchar(20) [ not null ]
+	status riderStatus [ not null ]
 	total_rides int [ not null ]
 	created_at timestamptz [ not null, default: `now()` ]
+}
+
+enum RideStatus {
+	"REQUESTED" // เรียกรถแล้ว
+	"ACCEPTED" // คนขับรับงานแล้ว
+	"IN_PROGRESS" // กำลังเดินทาง
+	"COMPLETED" // เดินทางเสร็จสิ้น
+	"CANCELLED" // ยกเลิกการเดินทาง
 }
 
 Table RideRequest [headercolor: #42c96d] {
@@ -32,9 +46,10 @@ Table RideRequest [headercolor: #42c96d] {
 	dropoff_lat numeric(9,6) [ not null ]
 	dropoff_lng numeric(9,6) [ not null ]
 	dropoff_address varchar(255) [ not null ]
-	status varchar(20) [ not null ]
+	status RideStatus [ not null ]
 	requested_at timestamptz [ not null, default: `now()` ]
 }
+
 
 Table RideHistory [headercolor: #0b8c52] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
@@ -44,8 +59,8 @@ Table RideHistory [headercolor: #0b8c52] {
 	vehicle_id uuid [ not null ]
 	distance_km numeric(6,2) [ not null ]
 	duration_min int [ not null ]
-	base_price numeric(10,2) [ not null ]
-	final_price numeric(10,2) [ not null ]
+	base_price numeric(10,2) [ not null, check: `base_price > 0` ]
+	final_price numeric(10,2) [ not null, check: `final_price > 0` ]
 	start_time timestamptz [ not null, default: `now()` ]
 	end_time timestamptz [ not null, default: `now()` ]
 	status varchar(20) [ not null ]
@@ -54,17 +69,25 @@ Table RideHistory [headercolor: #0b8c52] {
 Table Review [headercolor: #07b5fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_history_id uuid [ not null, unique ]
-	rating int [ not null ]
-	comment text [ not null ]
+	// rating ต้องอยู่ระหว่าง 1 ถึง 5
+	rating int [ not null, check: `rating >= 1 AND rating <= 5` ]
+	// comment ต้องไม่ว่าง และมีความยาวไม่เกิน 255 ตัวอักษร
+	comment varchar(255) [ not null ]
 	created_at timestamptz [ not null, default: `now()` ]
+}
+
+enum paymentStatus {
+	"PAID" // ชำระเงินแล้ว
+	"PENDING" // รอดำเนินการชำระเงิน
+	"FAILED" // การชำระเงินล้มเหลว
 }
 
 Table Payment_History [headercolor: #d60d0d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	ride_history_id uuid [ not null ]
 	payment_method_id uuid [ not null ]
-	amount numeric(10,2) [ not null ]
-	status varchar(20) [ not null ]
+	amount numeric(10,2) [ not null, check: `amount > 0` ]
+	status paymentStatus [ not null, default: `PENDING` ]
 	paid_at timestamptz [ not null, default: `now()` ]
 }
 
@@ -81,18 +104,33 @@ Table Discount_History [headercolor: #cf11fa] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	payment_history_id uuid [ not null ]
 	discount_id uuid [ not null ]
-	discount_amount numeric(10,2) [ not null ]
+	discount_amount numeric(10,2) [ not null, check: `discount_amount > 0` ]
 	applied_at timestamptz [ not null, default: `now()` ]
+}
+
+enum DiscountType {
+	"PERCENTAGE" // ส่วนลดเป็นเปอร์เซ็นต์
+	"FIXED" // ส่วนลดเป็นจำนวนเงินคงที่
 }
 
 Table Discount [headercolor: #ee81fc] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	code varchar(30) [ not null, unique ]
 	description varchar(255) [ not null ]
-	discount_type varchar(10) [ not null ]
-	value numeric(10,2) [ not null ]
+	discount_type DiscountType [ not null ]
+	value numeric(10,2) [ not null, check: `value > 0` ]
 	valid_from timestamptz [ not null, default: `now()` ]
 	valid_to timestamptz [ not null, default: `now()` ]
+
+	check: {
+		`valid_from < valid_to` // ตรวจสอบว่า valid_from ต้องน้อยกว่า valid_to
+	}
+}
+
+enum VehicleStatus {
+	"ACTIVE" // รถพร้อมใช้งาน
+	"INACTIVE" // รถไม่พร้อมใช้งาน
+	"MAINTENANCE" // รถอยู่ระหว่างการซ่อมบำรุง
 }
 
 Table Vehicles [headercolor: #fce028] {
@@ -104,23 +142,39 @@ Table Vehicles [headercolor: #fce028] {
 	model varchar(50) [ not null ]
 	color varchar(30) [ not null ]
 	year int [ not null ]
-	status varchar(20) [ not null ]
+	status VehicleStatus [ not null ]
+}
+
+enum DocumentType {
+	"ID" // บัตรประชาชน
+	"DL" // ใบขับขี่
+}
+
+enum VerificationStatus {
+	"VERIFIED" // เอกสารได้รับการยืนยันแล้ว
+	"PENDING" // เอกสารอยู่ระหว่างการตรวจสอบ
+	"REJECTED" // เอกสารถูกปฏิเสธ
 }
 
 Table GovermentDocuments [headercolor: #ff6e3d] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
 	rider_id uuid [ not null ]
-	document_type varchar(3) [ not null ]
+	document_type DocumentType [ not null ]
 	document_number varchar(30) [ not null ]
 	file_url varchar(255) [ not null ]
-	verification_status varchar(20) [ not null ]
+	verification_status VerificationStatus [ not null ]
 	verified_at timestamptz [ not null, default: `now()` ]
 	expiry_date date [ not null ]
+
+	Indexes {
+		(document_type, document_number) [ unique ]
+	}
 }
+
 
 Table VehiclesTypes [headercolor: #d6c315] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
-	name varchar(50) [ not null ]
+	name varchar(50) [ not null, unique ]
 	description varchar(255) [ not null ]
 	base_fare numeric(10,2) [ not null ]
 	price_per_km numeric(10,2) [ not null ]
