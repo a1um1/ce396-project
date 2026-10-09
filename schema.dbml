@@ -50,6 +50,11 @@ Table RideRequest [headercolor: #42c96d] {
 	requested_at timestamptz [ not null, default: `now()` ]
 }
 
+enum RideHistoryStatus {
+	"COMPLETED" // การเดินทางเสร็จสิ้น
+	"IN_PROGRESS" // การเดินทางกำลังดำเนินอยู่
+	"CANCELLED" // การเดินทางถูกยกเลิก
+}
 
 Table RideHistory [headercolor: #0b8c52] {
 	id uuid [ pk, not null, default: `UUIDV7()` ]
@@ -63,7 +68,7 @@ Table RideHistory [headercolor: #0b8c52] {
 	final_price numeric(10,2) [ not null, check: `final_price > 0` ]
 	start_time timestamptz [ not null, default: `now()` ]
 	end_time timestamptz [ not null, default: `now()` ]
-	status varchar(20) [ not null ]
+	status RideHistoryStatus [ not null ]
 }
 
 Table Review [headercolor: #07b5fa] {
